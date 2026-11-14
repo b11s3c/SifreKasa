@@ -1,7 +1,7 @@
 # Tehdit modeli
 
 Bu belge Şifre Kasa'nın neye karşı koruduğunu, neye karşı korumadığını ve hangi varsayımlara
-dayandığını anlatır. Aşama 5 (tarayıcı eklentisi) tamamlandığında ilgili bölüm eklenecektir.
+dayandığını anlatır.
 
 ## Korunan varlıklar
 
@@ -30,7 +30,7 @@ dayandığını anlatır. Aşama 5 (tarayıcı eklentisi) tamamlandığında ilg
 | Sistem yedeklerine sızma | `allowBackup=false` ve veri çıkarma kurallarıyla bulut yedeği ve cihazdan cihaza aktarım kapalı | — |
 | Ekran görüntüsü, ekran kaydı, son uygulamalar önizlemesi | `FLAG_SECURE` ve son uygulamalar görüntüsünün kapatılması | Fiziksel olarak ekrana bakan biri |
 | Panodan sızma | Kopyalanan değer "hassas" işaretlenir ve ayarlanan sürede silinir | Süre dolmadan panoyu okuyan başka bir uygulama ya da klavye |
-| Ağ üzerinden sızma, telemetri | Uygulamada `INTERNET` izni, analitik ve çökme raporlama yok | Yedek konumu Drive ise yüklemeyi Drive uygulaması yapar; yalnızca şifreli dosyayı görür |
+| Ağ üzerinden sızma, telemetri | Analitik, çökme raporlama ve reklam bileşeni yok. `INTERNET` izni yalnızca "bilgisayara gönder" içindir: tek ağ kodu, kullanıcı onayından sonra uçtan uca şifreli tek bir iletiyi kayıtlı aktarıcıya gönderir | Yedek konumu Drive ise yüklemeyi Drive uygulaması yapar; yalnızca şifreli dosyayı görür |
 | Kayıtlara (log) sızma | Gizli alanlar loglanmaz; model sınıflarının `toString` çıktıları ve hata iletileri sır içermez | — |
 | Kamera | Yalnızca QR taramak için; kareler bellekte çözülür, kaydedilmez | — |
 | Sahte ya da hatalı kripto | Kendi algoritmamız yok; libsodium kullanılır, çıktılar iki bağımsız kütüphaneyle ve RFC vektörleriyle sınanır | Kütüphane ya da platform açıkları |
@@ -66,6 +66,18 @@ bayrakları (BE/BS) buna göre işaretlenir, imza sayacı tutulmaz ve cihaz kan�
 Bilgisayardaki tarayıcının gösterdiği QR ile oturum açmada (hybrid akış) Bluetooth yakınlık denetimi
 ve şifreli tünel Android / Play Services tarafından yürütülür; Şifre Kasa'ya istek, çağıranı Play
 Services olan sıradan bir istek olarak ulaşır ve yukarıdaki kurallar aynen geçerlidir.
+
+## Bilgisayara gönderme
+
+Protokol ve güvenlik özellikleri [gonderme-protokolu.md](gonderme-protokolu.md) belgesindedir. Özet:
+
+| Tehdit | Önlem | Kalan risk |
+|---|---|---|
+| Aktarıcının ya da ağın veriyi görmesi/değiştirmesi | X25519 + HKDF + AES-256-GCM ile uçtan uca şifreleme; açık anahtar QR ile aktarıcının dışından taşınır | Üst veri: gönderim zamanı ve IP adresleri |
+| Yakalanan iletinin yeniden kullanılması | Her gönderimde iki tarafta yeni anahtar; oturum tek kullanımlık, 60 saniye ömürlü | — |
+| Sahte QR ile oltalama | Alan adı gösterilir, yalnızca eşleşen kayıtlar önerilir, aktarıcı sabitlenir, her gönderim onay ister | Eklenti kalıcı kimlik saklamadığı için QR'ın kaynağı kriptografik olarak doğrulanamaz; kullanıcı yalnızca kendi eklentisinin QR'ını okutmalıdır |
+| Bilgisayarda kalıcı iz | Eklenti yalnızca aktarıcı adresini saklar; anahtar ve şifre yalnızca bellekte, açılır pencere kapanınca yok olur | Doldurulan değerler sayfanın betiklerine ve tarayıcının kendi şifre kaydetme teklifine açıktır |
+| Yanlış sekmeye doldurma | Yalnızca isteği başlatan sekme; doldurmadan önce sekmenin hâlâ aynı alan adında olduğu denetlenir | — |
 
 ## Bilinçli tercihler
 

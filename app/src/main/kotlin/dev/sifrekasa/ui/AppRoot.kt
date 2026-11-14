@@ -9,6 +9,8 @@ import androidx.compose.runtime.setValue
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sifrekasa.AppContainer
+import dev.sifrekasa.core.send.SendException
+import dev.sifrekasa.core.send.SendRequest
 import dev.sifrekasa.core.totp.OtpAuth
 import dev.sifrekasa.core.totp.OtpAuthEntry
 import dev.sifrekasa.core.totp.OtpAuthException
@@ -18,17 +20,33 @@ private sealed interface Screen {
     data object List : Screen
     data class Edit(val id: String?, val prefill: OtpAuthEntry? = null) : Screen
     data object ScanNew : Screen
+    data class Send(val request: SendRequest) : Screen
     data object Settings : Screen
 }
 
 @Composable
-fun AppRoot(container: AppContainer, activity: FragmentActivity) {
+fun AppRoot(
+    container: AppContainer,
+    activity: FragmentActivity,
+    allowInsecureLocalRelay: Boolean = false,
+    pendingSendUri: String? = null,
+    onSendUriConsumed: () -> Unit = {},
+) {
     val state by container.vault.state.collectAsStateWithLifecycle()
     var screen by remember { mutableStateOf<Screen>(Screen.List) }
     val unlocked = state is VaultState.Unlocked
 
     LaunchedEffect(unlocked) {
         if (unlocked) container.lockManager.onUserInteraction() else screen = Screen.List
+    }
+
+    // Hata ayıklama derlemesinde bağlantıyla gelen istek, kasa açılınca işlenir.
+    LaunchedEffect(pendingSendUri, unlocked) {
+        if (pendingSendUri != null && unlocked) {
+            runCatching { SendRequest.parse(pendingSendUri, System.currentTimeMillis() / 1000, allowInsecureLocalRelay) }
+                .onSuccess { screen = Screen.Send(it) }
+            onSendUriConsumed()
+        }
     }
 
     when (val current = state) {
@@ -54,18 +72,32 @@ fun AppRoot(container: AppContainer, activity: FragmentActivity) {
             Screen.ScanNew -> {
                 var scanError by remember { mutableStateOf<String?>(null) }
                 QrScannerScreen(
-                    title = "2FA QR kodunu tara",
+                    title = "QR tara",
                     error = scanError,
                     onScanned = { text ->
+                        // İki tür QR tanınır: tarayıcı eklentisinin gönderme isteği ve 2FA (otpauth) kodu.
                         try {
-                            screen = Screen.Edit(id = null, prefill = OtpAuth.parse(text))
+                            screen = if (SendRequest.isSendUri(text)) {
+                                Screen.Send(SendRequest.parse(text, System.currentTimeMillis() / 1000, allowInsecureLocalRelay))
+                            } else {
+                                Screen.Edit(id = null, prefill = OtpAuth.parse(text))
+                            }
+                        } catch (e: SendException) {
+                            scanError = e.message
                         } catch (e: OtpAuthException) {
-                            scanError = "Bu QR bir 2FA kodu değil: ${e.message}"
+                            scanError = "Tanınmayan QR: ${e.message}"
                         }
                     },
                     onCancel = { screen = Screen.List },
                 )
             }
+            is Screen.Send -> SendScreen(
+                container = container,
+                activity = activity,
+                request = s.request,
+                entries = current.data.entries,
+                onClose = { screen = Screen.List },
+            )
             Screen.Settings -> SettingsScreen(container, activity, onBack = { screen = Screen.List })
         }
     }

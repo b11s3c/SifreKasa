@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Şifre Kasa</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font: 14px/1.4 system-ui, sans-serif; width: 300px; margin: 0; padding: 14px; }
+    h1 { font-size: 15px; margin: 0 0 8px; }
+    #domain { font-weight: 600; word-break: break-all; }
+    /* QR her temada koyu-açık kontrastla okunabilsin diye zemini hep beyazdır. */
+    #qr { display: block; margin: 12px auto; background: #fff; padding: 10px; border-radius: 6px; }
+    #status { margin: 8px 0 0; }
+    .error { color: #c62828; }
+    .ok { color: #2e7d32; }
+    .muted { opacity: .7; font-size: 12px; }
+    button { font: inherit; padding: 5px 10px; margin-top: 8px; }
+    #totp { font: 20px ui-monospace, monospace; letter-spacing: 2px; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <h1>Telefondan şifre al</h1>
+  <div>Site: <span id="domain">…</span></div>
+  <canvas id="qr" width="260" height="260" hidden></canvas>
+  <p id="status" role="status">Hazırlanıyor…</p>
+  <div id="totpBox" hidden>
+    <div class="muted">Doğrulama kodu (sayfada kod alanı bulunamadı):</div>
+    <div id="totp"></div>
+    <button id="copyTotp" type="button">Kodu kopyala</button>
+  </div>
+  <p class="muted" id="hint" hidden>Telefonda Şifre Kasa → QR tara. Bu pencere kapanırsa istek iptal olur.</p>
+  <button id="retry" type="button" hidden>Yeni QR oluştur</button>
+  <button id="options" type="button" hidden>Aktarıcı adresini ayarla</button>
+  <script src="vendor/qrcode.js"></script>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

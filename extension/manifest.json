@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Şifre Kasa",
+  "description": "Telefondaki Şifre Kasa'dan QR ile, uçtan uca şifreli olarak bu sekmeye şifre gönderir.",
+  "version": "0.1.0",
+  "minimum_chrome_version": "133",
+  "action": {
+    "default_title": "Şifre Kasa: telefondan şifre al",
+    "default_popup": "popup.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "permissions": ["activeTab", "scripting", "storage"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "sifrekasa@sifrekasa.invalid",
+      "strict_min_version": "130.0"
+    }
+  }
+}

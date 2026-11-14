@@ -13,6 +13,8 @@ kotlin {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.13.0")
     implementation("com.google.zxing:core:3.5.4")
+    // Bilgisayara gönderme protokolü: X25519, HKDF-SHA256 ve AES-256-GCM (libsodium bağlayıcısında HKDF yok).
+    implementation("com.google.crypto.tink:tink:1.24.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.goterl:lazysodium-java:5.1.4")
@@ -21,7 +23,6 @@ dependencies {
     testImplementation("org.bouncycastle:bcprov-jdk18on:1.87")
     // Yalnızca testlerde: ürettiğimiz WebAuthn yanıtlarını bağımsız bir sunucu kütüphanesiyle doğrulamak için.
     testImplementation("com.webauthn4j:webauthn4j-core:0.32.0.RELEASE")
-    testImplementation("com.google.crypto.tink:tink:1.24.0")
 }
 
 // Gerçek bir dışa aktarım dosyasını bağımsız kütüphanelerle açmayı denemek için:

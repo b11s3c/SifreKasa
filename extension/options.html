@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Şifre Kasa ayarları</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font: 14px/1.4 system-ui, sans-serif; padding: 14px; max-width: 520px; }
+    input { font: inherit; width: 100%; box-sizing: border-box; padding: 6px; }
+    button { font: inherit; padding: 5px 12px; margin-top: 8px; }
+    .muted { opacity: .7; font-size: 12px; }
+    .error { color: #c62828; } .ok { color: #2e7d32; }
+  </style>
+</head>
+<body>
+  <label for="relay">Aktarıcı adresi (kendi Cloudflare Worker'ın)</label>
+  <input id="relay" type="url" placeholder="https://sifrekasa-relay.ADIN.workers.dev" autocomplete="off" spellcheck="false">
+  <p class="muted">Aktarıcı yalnızca şifreli veriyi görür. Bu adres gizli değildir; eklentinin sakladığı tek şey budur.</p>
+  <button id="save" type="button">Kaydet</button>
+  <span id="result" role="status"></span>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

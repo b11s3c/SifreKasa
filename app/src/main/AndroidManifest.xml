@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Bilerek INTERNET izni yok. -->
+    <!--
+        Yalnızca "bilgisayara şifre gönder" özelliği için: kullanıcı onayladığında, uçtan uca şifreli tek bir
+        ileti kullanıcının kendi aktarıcısına gönderilir (bkz. data/RelayClient.kt). Başka ağ erişimi yoktur;
+        analitik, çökme raporlama ya da reklam bileşeni içermez.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Yalnızca QR taramak için; kareler cihazda işlenir, kaydedilmez. -->
     <uses-permission android:name="android.permission.CAMERA" />

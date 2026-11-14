@@ -177,6 +177,21 @@ fun SettingsScreen(container: AppContainer, activity: FragmentActivity, onBack: 
                 onClick = { runCatching { CredentialManager.create(activity).createSettingsPendingIntent().send() } },
             ) { Text("Geçiş anahtarı sağlayıcı ayarları") }
             HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
+            SectionTitle("Bilgisayara gönder")
+            var relay by remember { mutableStateOf(settings.relayUrl) }
+            Text(
+                relay?.let { "Kayıtlı aktarıcı: $it" }
+                    ?: "Henüz aktarıcı kaydedilmedi. Tarayıcı eklentisinin gösterdiği QR'ı ilk okuttuğunda sorulur.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            OutlinedButton(
+                onClick = {
+                    settings.relayUrl = null
+                    relay = null
+                },
+                enabled = relay != null,
+            ) { Text("Aktarıcıyı unut") }
+            HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
             SectionTitle("Dışa / içe aktarım")
             BackupSection(container)
             HorizontalDivider()

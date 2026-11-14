@@ -34,6 +34,11 @@ class AppSettings(context: Context) {
         get() = prefs.getString("last_backup_error", null)
         set(value) = prefs.edit().putString("last_backup_error", value).apply()
 
+    /** "Bilgisayara gönder" için güvenilen aktarıcının adresi; ilk kullanımda kullanıcı onayıyla kaydedilir. */
+    var relayUrl: String?
+        get() = prefs.getString("relay_url", null)
+        set(value) = prefs.edit().putString("relay_url", value).apply()
+
     /** Panoya kopyalanan değeri şu kadar saniye sonra sil; 0 = kapalı. */
     var clipboardClearSeconds: Int
         get() = prefs.getInt("clipboard_clear_seconds", 30)

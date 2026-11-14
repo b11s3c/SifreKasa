@@ -1,0 +1,15 @@
+name = "sifrekasa-relay"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+
+# İstek ve yanıtlar hiçbir yerde tutulmasın.
+[observability]
+enabled = false
+
+[[durable_objects.bindings]]
+name = "SESSIONS"
+class_name = "Session"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Session"]
