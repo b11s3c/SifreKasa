@@ -7,6 +7,7 @@ import com.goterl.lazysodium.SodiumAndroid
 import dev.sifrekasa.core.crypto.CryptoEngine
 import dev.sifrekasa.core.crypto.SodiumCryptoEngine
 import dev.sifrekasa.data.AppSettings
+import dev.sifrekasa.data.BackupManager
 import dev.sifrekasa.data.VaultRepository
 import dev.sifrekasa.security.BiometricKeyStore
 import dev.sifrekasa.security.ClipboardHelper
@@ -21,6 +22,7 @@ class AppContainer(app: Application) {
     val biometricKeyStore = BiometricKeyStore(app)
     val clipboard = ClipboardHelper(app, settings)
     val lockManager = LockManager(vault, settings)
+    val backup = BackupManager(app, vault, settings)
 }
 
 class SifreKasaApp : Application() {

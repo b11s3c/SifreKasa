@@ -21,3 +21,12 @@ dependencies {
     testImplementation("org.bouncycastle:bcprov-jdk18on:1.87")
     testImplementation("com.google.crypto.tink:tink:1.24.0")
 }
+
+// Gerçek bir dışa aktarım dosyasını bağımsız kütüphanelerle açmayı denemek için:
+//   ./gradlew :core:test --tests '*ExternalFileInteropTest*' -Pskx.file=/yol/dosya.skx -Pskx.password=parola
+tasks.test {
+    listOf("skx.file", "skx.password").forEach { name ->
+        (findProperty(name) as String?)?.let { systemProperty(name, it) }
+    }
+    if (hasProperty("skx.file")) outputs.upToDateWhen { false }
+}

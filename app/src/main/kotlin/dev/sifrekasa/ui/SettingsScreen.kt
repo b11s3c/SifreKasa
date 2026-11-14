@@ -103,7 +103,8 @@ fun SettingsScreen(container: AppContainer, activity: FragmentActivity, onBack: 
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 24.dp),
         ) {
             SectionTitle("Kilit")
             SwitchRow(
@@ -142,6 +143,9 @@ fun SettingsScreen(container: AppContainer, activity: FragmentActivity, onBack: 
                     container.lockManager.onUserInteraction()
                 },
             )
+            HorizontalDivider()
+            SectionTitle("Dışa / içe aktarım")
+            BackupSection(container)
             HorizontalDivider()
             SectionTitle("Panoyu temizle")
             ChoiceGroup(

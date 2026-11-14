@@ -4,9 +4,15 @@ import android.util.AtomicFile
 import dev.sifrekasa.core.crypto.CryptoEngine
 import dev.sifrekasa.core.crypto.KdfParams
 import dev.sifrekasa.core.crypto.Secrets
+import dev.sifrekasa.core.model.BackupConfig
 import dev.sifrekasa.core.model.LoginEntry
 import dev.sifrekasa.core.model.VaultData
+import dev.sifrekasa.core.vault.ExportFormat
+import dev.sifrekasa.core.vault.ExportKey
+import dev.sifrekasa.core.vault.ExportPayload
 import dev.sifrekasa.core.vault.KeySlot
+import dev.sifrekasa.core.vault.MergeResult
+import dev.sifrekasa.core.vault.VaultMerge
 import dev.sifrekasa.core.vault.VaultFormat
 import dev.sifrekasa.core.vault.VaultFormatException
 import dev.sifrekasa.core.vault.WrongKeyException
@@ -38,8 +44,15 @@ class VaultRepository(private val file: File, private val engine: CryptoEngine) 
     private val _state = MutableStateFlow<VaultState>(if (file.exists()) VaultState.Locked else VaultState.NoVault)
     val state: StateFlow<VaultState> = _state.asStateFlow()
 
-    /** [password] çağrı sonunda silinir. */
-    suspend fun create(password: CharArray) = withContext(Dispatchers.Default) {
+    /**
+     * Kasa her değiştiğinde, yedekleme kuruluysa, güncel içeriğin ŞİFRELİ yedek dosyası baytlarıyla çağrılır.
+     * Dinleyici düz veriye hiç erişmez.
+     */
+    @Volatile
+    var onBackupReady: ((ByteArray) -> Unit)? = null
+
+    /** [password] çağrı sonunda silinir. [initial]: yedekten geri yüklenen içerik. */
+    suspend fun create(password: CharArray, initial: VaultData = VaultData()) = withContext(Dispatchers.Default) {
         val pw = Secrets.utf8(password)
         Secrets.wipe(password)
         try {
@@ -47,11 +60,11 @@ class VaultRepository(private val file: File, private val engine: CryptoEngine) 
             val slot = VaultFormat.createKeySlot(engine, pw, KdfParams.DEFAULT, newDek)
             synchronized(guard) {
                 check(!file.exists()) { "Kasa zaten var" }
-                val empty = VaultData()
-                write(slot, newDek, empty)
+                val data = initial.copy(backup = null)
+                write(slot, newDek, data)
                 dek = newDek
                 keySlot = slot
-                _state.value = VaultState.Unlocked(empty)
+                _state.value = VaultState.Unlocked(data)
             }
         } finally {
             Secrets.wipe(pw)
@@ -116,6 +129,67 @@ class VaultRepository(private val file: File, private val engine: CryptoEngine) 
         data.copy(entries = data.entries.filterNot { it.id == id })
     }
 
+    /** Yedekleme anahtarını kaydeder ya da (null ile) siler. */
+    suspend fun setBackup(config: BackupConfig?) = mutate { it.copy(backup = config) }
+
+    /** İçe aktarılan kayıtları birleştirir; kasa kilitliyse null. */
+    suspend fun merge(imported: VaultData): MergeResult? {
+        var result: MergeResult? = null
+        val saved = mutate { current -> VaultMerge.merge(current, imported).also { result = it }.data }
+        return if (saved) result else null
+    }
+
+    /** Dışa aktarım parolasından anahtar türetir (yavaş). [password] silinir. */
+    suspend fun deriveExportKey(password: CharArray): ExportKey = withContext(Dispatchers.Default) {
+        val pw = Secrets.utf8(password)
+        Secrets.wipe(password)
+        try {
+            ExportFormat.deriveKey(engine, pw)
+        } finally {
+            Secrets.wipe(pw)
+        }
+    }
+
+    /**
+     * Bir dışa aktarım dosyasını çözer (yavaş). [password] silinir.
+     * @throws WrongKeyException, VaultFormatException
+     */
+    suspend fun openExport(bytes: ByteArray, password: CharArray): ExportPayload = withContext(Dispatchers.Default) {
+        val pw = Secrets.utf8(password)
+        Secrets.wipe(password)
+        try {
+            ExportFormat.open(engine, bytes, pw)
+        } finally {
+            Secrets.wipe(pw)
+        }
+    }
+
+    /** Güncel içeriğin [key] ile şifrelenmiş dışa aktarım dosyası; kasa kilitliyse null. */
+    fun sealExport(key: ExportKey): ByteArray? = synchronized(guard) {
+        val data = (_state.value as? VaultState.Unlocked)?.data ?: return null
+        ExportFormat.seal(engine, key, data, System.currentTimeMillis())
+    }
+
+    /** Kasada saklanan yedek anahtarıyla şifrelenmiş yedek dosyası; yedekleme kurulu değilse ya da kasa kilitliyse null. */
+    fun sealBackup(): ByteArray? = synchronized(guard) {
+        val data = (_state.value as? VaultState.Unlocked)?.data ?: return null
+        sealBackup(data)
+    }
+
+    private fun sealBackup(data: VaultData): ByteArray? {
+        val config = data.backup ?: return null
+        val key = try {
+            ExportKey.from(config)
+        } catch (e: IllegalArgumentException) {
+            return null
+        }
+        try {
+            return ExportFormat.seal(engine, key, data, System.currentTimeMillis())
+        } finally {
+            Secrets.wipe(key.key)
+        }
+    }
+
     /** Biyometrik sarma için DEK'in kopyası; çağıran kullanınca silmelidir. Kasa kilitliyse null. */
     fun copyDek(): ByteArray? = synchronized(guard) { dek?.clone() }
 
@@ -137,6 +211,7 @@ class VaultRepository(private val file: File, private val engine: CryptoEngine) 
             val updated = change(current)
             write(slot, key, updated)
             _state.value = VaultState.Unlocked(updated)
+            onBackupReady?.let { listener -> sealBackup(updated)?.let(listener) }
             true
         }
     }

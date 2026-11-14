@@ -25,6 +25,23 @@ data class LoginEntry(
 data class VaultData(
     val schema: Int = 1,
     val entries: List<LoginEntry> = emptyList(),
+    /** Otomatik/elle yedek için saklanan anahtar; yedekleme kurulmadıysa null. Dışa aktarılan dosyaya girmez. */
+    val backup: BackupConfig? = null,
 ) {
     override fun toString(): String = "VaultData(entries=${entries.size})"
+}
+
+/**
+ * Yedek parolasından Argon2id ile türetilmiş anahtar ve türetme parametreleri.
+ * Parolanın kendisi saklanmaz; anahtar kasanın içinde (şifreli) durur ki kasa açıkken
+ * parola sormadan yedek yazılabilsin. Bayt dizileri Base64'tür.
+ */
+@Serializable
+data class BackupConfig(
+    val opsLimit: Int,
+    val memKiB: Int,
+    val salt: String,
+    val key: String,
+) {
+    override fun toString(): String = "BackupConfig()"
 }

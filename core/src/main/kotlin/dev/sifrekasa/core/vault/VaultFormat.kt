@@ -10,7 +10,6 @@ import dev.sifrekasa.core.crypto.KdfParams
 import dev.sifrekasa.core.crypto.Secrets
 import dev.sifrekasa.core.model.VaultData
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.Json
 import java.nio.ByteBuffer
 
 /** Dosya kasa dosyası değil, bozuk ya da desteklenmeyen sürümde. */
@@ -58,10 +57,7 @@ object VaultFormat {
     private const val WRAPPED_DEK_LENGTH = KEY_LENGTH + TAG_LENGTH
     const val HEADER_LENGTH = KDF_SECTION_LENGTH + NONCE_LENGTH + WRAPPED_DEK_LENGTH + NONCE_LENGTH
 
-    private val json = Json {
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-    }
+    private val json = VaultJson.json
 
     fun newDek(engine: CryptoEngine): ByteArray = engine.randomBytes(KEY_LENGTH)
 
