@@ -7,6 +7,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -17,6 +19,22 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.material3.LocalTextStyle
+
+/** Her saniye başında güncellenen Unix zamanı (saniye). */
+@Composable
+fun rememberEpochSeconds(): Long {
+    val seconds by produceState(System.currentTimeMillis() / 1000) {
+        while (true) {
+            val now = System.currentTimeMillis()
+            value = now / 1000
+            delay(1000 - now % 1000)
+        }
+    }
+    return seconds
+}
+
+/** "123456" -> "123 456" */
+fun formatCode(code: String): String = code.substring(0, code.length / 2) + " " + code.substring(code.length / 2)
 
 /**
  * Parola alanı. Değer bilerek rememberSaveable ile SAKLANMAZ: kayıtlı durum paketine

@@ -9,11 +9,15 @@ import androidx.compose.runtime.setValue
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sifrekasa.AppContainer
+import dev.sifrekasa.core.totp.OtpAuth
+import dev.sifrekasa.core.totp.OtpAuthEntry
+import dev.sifrekasa.core.totp.OtpAuthException
 import dev.sifrekasa.data.VaultState
 
 private sealed interface Screen {
     data object List : Screen
-    data class Edit(val id: String?) : Screen
+    data class Edit(val id: String?, val prefill: OtpAuthEntry? = null) : Screen
+    data object ScanNew : Screen
     data object Settings : Screen
 }
 
@@ -36,14 +40,32 @@ fun AppRoot(container: AppContainer, activity: FragmentActivity) {
                 onAdd = { screen = Screen.Edit(null) },
                 onOpen = { screen = Screen.Edit(it) },
                 onSettings = { screen = Screen.Settings },
+                onScan = { screen = Screen.ScanNew },
+                onCopyCode = { container.clipboard.copySensitive(it) },
                 onLock = { container.vault.lock() },
             )
             is Screen.Edit -> EntryEditScreen(
                 existing = current.data.entries.firstOrNull { it.id == s.id },
+                prefill = s.prefill,
                 vault = container.vault,
                 clipboard = container.clipboard,
                 onClose = { screen = Screen.List },
             )
+            Screen.ScanNew -> {
+                var scanError by remember { mutableStateOf<String?>(null) }
+                QrScannerScreen(
+                    title = "2FA QR kodunu tara",
+                    error = scanError,
+                    onScanned = { text ->
+                        try {
+                            screen = Screen.Edit(id = null, prefill = OtpAuth.parse(text))
+                        } catch (e: OtpAuthException) {
+                            scanError = "Bu QR bir 2FA kodu değil: ${e.message}"
+                        }
+                    },
+                    onCancel = { screen = Screen.List },
+                )
+            }
             Screen.Settings -> SettingsScreen(container, activity, onBack = { screen = Screen.List })
         }
     }

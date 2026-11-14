@@ -3,6 +3,10 @@
 
     <!-- Bilerek INTERNET izni yok. -->
 
+    <!-- Yalnızca QR taramak için; kareler cihazda işlenir, kaydedilmez. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
     <application
         android:name=".SifreKasaApp"
         android:allowBackup="false"

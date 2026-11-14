@@ -12,6 +12,7 @@ kotlin {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.13.0")
+    implementation("com.google.zxing:core:3.5.4")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.goterl:lazysodium-java:5.1.4")

@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,7 +35,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontFamily
 import dev.sifrekasa.core.model.LoginEntry
+import dev.sifrekasa.core.totp.Totp
 import java.util.Locale
 
 private val turkish = Locale.forLanguageTag("tr")
@@ -55,9 +58,13 @@ fun VaultListScreen(
     onAdd: () -> Unit,
     onOpen: (String) -> Unit,
     onSettings: () -> Unit,
+    onScan: () -> Unit,
+    onCopyCode: (String) -> Unit,
     onLock: () -> Unit,
 ) {
     var query by remember { mutableStateOf("") }
+    // Saat yalnızca listede 2FA kodu gösterilecekse işler.
+    val now = if (entries.any { it.totp != null }) rememberEpochSeconds() else 0L
     val visible = remember(entries, query) {
         entries.filter { it.matches(query) }.sortedBy { it.title.lowercase(turkish) }
     }
@@ -67,6 +74,7 @@ fun VaultListScreen(
             TopAppBar(
                 title = { Text("Kasa") },
                 actions = {
+                    TextButton(onClick = onScan) { Text("QR tara") }
                     IconButton(onClick = onLock) { Icon(Icons.Default.Lock, contentDescription = "Kilitle") }
                     IconButton(onClick = onSettings) { Icon(Icons.Default.Settings, contentDescription = "Ayarlar") }
                 },
@@ -107,6 +115,14 @@ fun VaultListScreen(
                             supportingContent = {
                                 val secondary = entry.username.ifBlank { entry.url }
                                 if (secondary.isNotBlank()) Text(secondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            },
+                            trailingContent = entry.totp?.let { totp ->
+                                {
+                                    val code = Totp.code(totp, now)
+                                    TextButton(onClick = { onCopyCode(code) }) {
+                                        Text(formatCode(code), fontFamily = FontFamily.Monospace)
+                                    }
+                                }
                             },
                             modifier = Modifier.clickable { onOpen(entry.id) },
                         )

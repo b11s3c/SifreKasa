@@ -39,6 +39,12 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.10.0")
     implementation("androidx.lifecycle:lifecycle-process:2.10.0")
     implementation("androidx.biometric:biometric:1.1.0")
+    // biometric 1.1.0 eski bir fragment sürümü getirir; o sürümde izin/sonuç başlatıcıları
+    // "Can only use lower 16 bits for requestCode" hatasıyla çöker.
+    implementation("androidx.fragment:fragment:1.8.9")
+    implementation("androidx.camera:camera-camera2:1.5.3")
+    implementation("androidx.camera:camera-lifecycle:1.5.3")
+    implementation("androidx.camera:camera-view:1.5.3")
 
     implementation("com.goterl:lazysodium-android:5.2.0@aar")
     implementation("net.java.dev.jna:jna:5.19.1@aar")

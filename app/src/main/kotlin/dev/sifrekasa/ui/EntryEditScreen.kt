@@ -36,7 +36,16 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.Card
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.text.font.FontFamily
 import dev.sifrekasa.core.model.LoginEntry
+import dev.sifrekasa.core.totp.OtpAuth
+import dev.sifrekasa.core.totp.OtpAuthEntry
+import dev.sifrekasa.core.totp.OtpAuthException
+import dev.sifrekasa.core.totp.Totp
+import dev.sifrekasa.core.totp.TotpConfig
 import dev.sifrekasa.data.VaultRepository
 import dev.sifrekasa.security.ClipboardHelper
 import kotlinx.coroutines.launch
@@ -46,14 +55,19 @@ import java.util.UUID
 @Composable
 fun EntryEditScreen(
     existing: LoginEntry?,
+    prefill: OtpAuthEntry?,
     vault: VaultRepository,
     clipboard: ClipboardHelper,
     onClose: () -> Unit,
 ) {
     // Ekran açıkken kayıt değişse bile form ilk değerlerle kalsın.
     val original = remember { existing }
-    var title by remember { mutableStateOf(original?.title.orEmpty()) }
-    var username by remember { mutableStateOf(original?.username.orEmpty()) }
+    var title by remember { mutableStateOf(original?.title ?: prefill?.issuer.orEmpty()) }
+    var username by remember { mutableStateOf(original?.username ?: prefill?.account.orEmpty()) }
+    var totp by remember { mutableStateOf(original?.totp ?: prefill?.config) }
+    var scanning by remember { mutableStateOf(false) }
+    var scanError by remember { mutableStateOf<String?>(null) }
+    var showManualTotp by remember { mutableStateOf(false) }
     var password by remember { mutableStateOf(original?.password.orEmpty()) }
     var url by remember { mutableStateOf(original?.url.orEmpty()) }
     var notes by remember { mutableStateOf(original?.notes.orEmpty()) }
@@ -64,7 +78,8 @@ fun EntryEditScreen(
     val scope = rememberCoroutineScope()
 
     val dirty = title != original?.title.orEmpty() || username != original?.username.orEmpty() ||
-        password != original?.password.orEmpty() || url != original?.url.orEmpty() || notes != original?.notes.orEmpty()
+        password != original?.password.orEmpty() || url != original?.url.orEmpty() || notes != original?.notes.orEmpty() ||
+        totp != original?.totp
 
     fun back() {
         if (dirty) confirmDiscard = true else onClose()
@@ -81,6 +96,7 @@ fun EntryEditScreen(
             password = password,
             url = url.trim(),
             notes = notes,
+            totp = totp,
             createdAt = original?.createdAt ?: now,
             updatedAt = now,
         )
@@ -88,6 +104,30 @@ fun EntryEditScreen(
             vault.upsert(entry)
             onClose()
         }
+    }
+
+    /** Taranan ya da elle girilen 2FA bilgisini forma uygular; boş alanları yayıncı/hesapla doldurur. */
+    fun applyTotp(entry: OtpAuthEntry) {
+        totp = entry.config
+        if (title.isBlank()) title = entry.issuer
+        if (username.isBlank()) username = entry.account
+    }
+
+    if (scanning) {
+        QrScannerScreen(
+            title = "2FA QR kodunu tara",
+            error = scanError,
+            onScanned = { text ->
+                try {
+                    applyTotp(OtpAuth.parse(text))
+                    scanning = false
+                } catch (e: OtpAuthException) {
+                    scanError = "Bu QR bir 2FA kodu değil: ${e.message}"
+                }
+            },
+            onCancel = { scanning = false },
+        )
+        return
     }
 
     BackHandler(onBack = ::back)
@@ -156,6 +196,16 @@ fun EntryEditScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, autoCorrectEnabled = false, imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth(),
             )
+            TotpSection(
+                totp = totp,
+                onCopy = { clipboard.copySensitive(it) },
+                onScan = {
+                    scanError = null
+                    scanning = true
+                },
+                onManual = { showManualTotp = true },
+                onRemove = { totp = null },
+            )
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it },
@@ -165,12 +215,21 @@ fun EntryEditScreen(
             )
             Button(
                 onClick = ::save,
-                enabled = !saving && (title.isNotBlank() || username.isNotBlank() || password.isNotEmpty()),
+                enabled = !saving && (title.isNotBlank() || username.isNotBlank() || password.isNotEmpty() || totp != null),
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Kaydet") }
         }
     }
 
+    if (showManualTotp) {
+        ManualTotpDialog(
+            onAccept = {
+                applyTotp(it)
+                showManualTotp = false
+            },
+            onDismiss = { showManualTotp = false },
+        )
+    }
     if (showGenerator) {
         GeneratorDialog(
             onUse = {
@@ -206,4 +265,77 @@ fun EntryEditScreen(
             dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text("Düzenlemeye dön") } },
         )
     }
+}
+
+@Composable
+private fun TotpSection(
+    totp: TotpConfig?,
+    onCopy: (String) -> Unit,
+    onScan: () -> Unit,
+    onManual: () -> Unit,
+    onRemove: () -> Unit,
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("İki adımlı doğrulama (2FA)", style = MaterialTheme.typography.titleSmall)
+            if (totp == null) {
+                Text("Bu kayda bağlı bir doğrulama kodu yok.", style = MaterialTheme.typography.bodySmall)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = onScan) { Text("QR tara") }
+                    OutlinedButton(onClick = onManual) { Text("Elle gir") }
+                }
+            } else {
+                val now = rememberEpochSeconds()
+                val code = Totp.code(totp, now)
+                val remaining = Totp.secondsRemaining(totp, now)
+                Text(formatCode(code), style = MaterialTheme.typography.headlineMedium, fontFamily = FontFamily.Monospace)
+                LinearProgressIndicator(
+                    progress = { remaining / totp.period.toFloat() },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text("$remaining sn sonra yenilenir", style = MaterialTheme.typography.bodySmall)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = { onCopy(code) }) { Text("Kodu kopyala") }
+                    TextButton(onClick = onRemove) { Text("2FA'yı kaldır") }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ManualTotpDialog(onAccept: (OtpAuthEntry) -> Unit, onDismiss: () -> Unit) {
+    var input by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("2FA anahtarını gir") },
+        text = {
+            OutlinedTextField(
+                value = input,
+                onValueChange = {
+                    input = it
+                    error = null
+                },
+                label = { Text("Gizli anahtar ya da otpauth:// bağlantısı") },
+                isError = error != null,
+                supportingText = { Text(error ?: "Sitenin \"QR okutamıyorum\" seçeneğinde gösterdiği anahtar.") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        confirmButton = {
+            TextButton(
+                enabled = input.isNotBlank(),
+                onClick = {
+                    try {
+                        onAccept(OtpAuth.parseManual(input))
+                    } catch (e: OtpAuthException) {
+                        error = e.message
+                    }
+                },
+            ) { Text("Ekle") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Vazgeç") } },
+    )
 }
