@@ -88,7 +88,12 @@ Yedek anahtarı dışa aktarılan JSON'a yazılmaz ve içe aktarılan dosyadan a
         "id": "uuid",
         "title": "", "username": "", "password": "", "url": "", "notes": "",
         "createdAt": 0, "updatedAt": 0,
-        "totp": { "secret": "BASE32", "algorithm": "SHA1", "digits": 6, "period": 30 }
+        "totp": { "secret": "BASE32", "algorithm": "SHA1", "digits": 6, "period": 30 },
+        "passkey": {
+          "credentialId": "base64url", "rpId": "example.com", "rpName": "",
+          "userHandle": "base64url", "userName": "", "userDisplayName": "",
+          "privateKey": "PKCS#8 DER (P-256), Base64", "createdAt": 0
+        }
       }
     ]
   }
@@ -96,7 +101,7 @@ Yedek anahtarı dışa aktarılan JSON'a yazılmaz ve içe aktarılan dosyadan a
 ```
 
 Kasa dosyasının gövdesi yalnızca `vault` nesnesidir (ek olarak `backup` alanını içerebilir).
-`totp` yoksa `null`'dır. Bilinmeyen alanlar okurken yok sayılır; yeni alanlar varsayılan değerle
+`totp` ve `passkey` yoksa `null`'dır. Bilinmeyen alanlar okurken yok sayılır; yeni alanlar varsayılan değerle
 eklenir. Uyumsuz bir değişiklikte başlıktaki biçim sürümü artırılır ve eski sürümler dosyayı reddeder.
 
 ### İçe aktarım kuralları

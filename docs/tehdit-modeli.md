@@ -1,8 +1,7 @@
 # Tehdit modeli
 
 Bu belge Şifre Kasa'nın neye karşı koruduğunu, neye karşı korumadığını ve hangi varsayımlara
-dayandığını anlatır. Aşama 4 (otomatik doldurma, geçiş anahtarları) ve Aşama 5 (tarayıcı eklentisi)
-tamamlandıkça ilgili bölümler eklenecektir.
+dayandığını anlatır. Aşama 5 (tarayıcı eklentisi) tamamlandığında ilgili bölüm eklenecektir.
 
 ## Korunan varlıklar
 
@@ -35,6 +34,38 @@ tamamlandıkça ilgili bölümler eklenecektir.
 | Kayıtlara (log) sızma | Gizli alanlar loglanmaz; model sınıflarının `toString` çıktıları ve hata iletileri sır içermez | — |
 | Kamera | Yalnızca QR taramak için; kareler bellekte çözülür, kaydedilmez | — |
 | Sahte ya da hatalı kripto | Kendi algoritmamız yok; libsodium kullanılır, çıktılar iki bağımsız kütüphaneyle ve RFC vektörleriyle sınanır | Kütüphane ya da platform açıkları |
+
+## Otomatik doldurma
+
+| Tehdit | Önlem | Kalan risk |
+|---|---|---|
+| Servisin arka planda veri sızdırması | Servis kasaya dokunmaz; yanıtında yalnızca değer taşımayan "Şifre Kasa ile doldur" seçeneği vardır. Değerler, kullanıcı kilidi açıp kaydı seçtikten sonra seçim ekranından verilir | — |
+| Oltalama sitesi | Kayıt yalnızca alan adı aynıysa ya da kayıttaki alan adının alt alan adıysa önerilir; benzer adlar eşleşmez | Kullanıcı "başka bir kayıt ara" ile elle yanlış siteye doldurabilir; ekranda uyarı gösterilir |
+| Sahte tarayıcının yanlış alan adı bildirmesi | Bildirilen alan adına yalnızca Google'ın açık listesindeki ve imza sertifikası tutan tarayıcılarda güvenilir | Listede olmayan tarayıcılar uygulama gibi işlenir (otomatik eşleşme yok) |
+| Sayfadaki gömülü çerçeveler (iframe) | Formda birden fazla farklı alan adı görülürse hiçbiri kullanılmaz, otomatik eşleşme yapılmaz | — |
+| Kötü amaçlı yerel uygulama | Uygulamalar için otomatik eşleşme yoktur; kullanıcı kaydı kendisi arar, uygulamanın adı ve paket adı gösterilir | Uygulama ile site arasındaki bağ (Digital Asset Links) doğrulanmaz; karar kullanıcıdadır |
+
+Yeni şifre kaydetme teklifi yapılmaz; form içerikleri okunmaz ve saklanmaz. Kayıtta 2FA varsa
+doldurma anında güncel kod panoya alınır (pano yine süreyle temizlenir).
+
+## Geçiş anahtarları
+
+| Tehdit | Önlem | Kalan risk |
+|---|---|---|
+| Kullanıcı onayı olmadan imza | Servis imza üretmez. İmza ve anahtar üretimi yalnızca ekranda, kasa az önce açılmışsa ya da ayrıca biyometri / ekran kilidiyle doğrulandıktan sonra yapılır | — |
+| Kilitliyken hangi sitelerde hesap olduğunun sızması | Kilitliyken sisteme yalnızca "kilidi aç" seçeneği verilir; anahtar listesi kasa açıldıktan sonra oluşturulur | — |
+| Sahte tarayıcının başka site adına istekte bulunması | Web kökeni yalnızca listede olan ve imzası tutan çağıranlardan kabul edilir; diğerleri reddedilir | Listedeki bir tarayıcının kendisinin ele geçirilmesi |
+| Yerel uygulamanın başka sitenin anahtarını istemesi | İmzalanan veride köken olarak uygulamanın imza özeti (`android:apk-key-hash:…`) yer alır; site bunu tanımıyorsa reddeder. Kullanıcıya isteyen uygulama gösterilir ve onayı alınır | Uygulama–site bağı (Digital Asset Links) ağ erişimi olmadığı için doğrulanmaz; koruma sitenin köken denetimine dayanır |
+| Özel anahtarın ele geçmesi | Anahtar kasada, DEK ile şifreli durur; yedekte de şifrelidir | Anahtar donanıma bağlı değildir: kasayı ya da yedeği açabilen kişi anahtarı kopyalayabilir |
+
+Özel anahtarların Android Keystore yerine kasada tutulması bilinçli bir tercihtir: Keystore'daki
+anahtar cihazdan çıkarılamaz, dolayısıyla yedeklenemez ve telefon kaybolunca tüm geçiş anahtarları
+da kaybolur. Karşılığında anahtarlar "eşitlenen" sınıftadır; yanıtlarda yedeklenebilir/yedeklendi
+bayrakları (BE/BS) buna göre işaretlenir, imza sayacı tutulmaz ve cihaz kanıtı (attestation) verilmez.
+
+Bilgisayardaki tarayıcının gösterdiği QR ile oturum açmada (hybrid akış) Bluetooth yakınlık denetimi
+ve şifreli tünel Android / Play Services tarafından yürütülür; Şifre Kasa'ya istek, çağıranı Play
+Services olan sıradan bir istek olarak ulaşır ve yukarıdaki kurallar aynen geçerlidir.
 
 ## Bilinçli tercihler
 

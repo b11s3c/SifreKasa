@@ -65,6 +65,8 @@ fun EntryEditScreen(
     var title by remember { mutableStateOf(original?.title ?: prefill?.issuer.orEmpty()) }
     var username by remember { mutableStateOf(original?.username ?: prefill?.account.orEmpty()) }
     var totp by remember { mutableStateOf(original?.totp ?: prefill?.config) }
+    var passkey by remember { mutableStateOf(original?.passkey) }
+    var confirmPasskeyDelete by remember { mutableStateOf(false) }
     var scanning by remember { mutableStateOf(false) }
     var scanError by remember { mutableStateOf<String?>(null) }
     var showManualTotp by remember { mutableStateOf(false) }
@@ -79,7 +81,7 @@ fun EntryEditScreen(
 
     val dirty = title != original?.title.orEmpty() || username != original?.username.orEmpty() ||
         password != original?.password.orEmpty() || url != original?.url.orEmpty() || notes != original?.notes.orEmpty() ||
-        totp != original?.totp
+        totp != original?.totp || passkey != original?.passkey
 
     fun back() {
         if (dirty) confirmDiscard = true else onClose()
@@ -97,6 +99,7 @@ fun EntryEditScreen(
             url = url.trim(),
             notes = notes,
             totp = totp,
+            passkey = passkey,
             createdAt = original?.createdAt ?: now,
             updatedAt = now,
         )
@@ -206,6 +209,20 @@ fun EntryEditScreen(
                 onManual = { showManualTotp = true },
                 onRemove = { totp = null },
             )
+            passkey?.let { key ->
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("Geçiş anahtarı", style = MaterialTheme.typography.titleSmall)
+                        Text("Site: ${key.rpId}")
+                        if (key.userName.isNotBlank()) Text("Hesap: ${key.userName}")
+                        Text(
+                            "Oluşturma: " + java.text.DateFormat.getDateInstance().format(java.util.Date(key.createdAt)),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                        TextButton(onClick = { confirmPasskeyDelete = true }) { Text("Geçiş anahtarını sil") }
+                    }
+                }
+            }
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it },
@@ -215,12 +232,26 @@ fun EntryEditScreen(
             )
             Button(
                 onClick = ::save,
-                enabled = !saving && (title.isNotBlank() || username.isNotBlank() || password.isNotEmpty() || totp != null),
+                enabled = !saving && (title.isNotBlank() || username.isNotBlank() || password.isNotEmpty() || totp != null || passkey != null),
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Kaydet") }
         }
     }
 
+    if (confirmPasskeyDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmPasskeyDelete = false },
+            title = { Text("Geçiş anahtarı silinsin mi?") },
+            text = { Text("Kaydettiğinde anahtar kasadan kalkar ve bu siteye onunla giremezsin. Sitedeki kaydını ayrıca sitenin ayarlarından kaldırman gerekir.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    passkey = null
+                    confirmPasskeyDelete = false
+                }) { Text("Sil") }
+            },
+            dismissButton = { TextButton(onClick = { confirmPasskeyDelete = false }) { Text("Vazgeç") } },
+        )
+    }
     if (showManualTotp) {
         ManualTotpDialog(
             onAccept = {

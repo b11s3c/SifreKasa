@@ -42,6 +42,7 @@ dependencies {
     // biometric 1.1.0 eski bir fragment sürümü getirir; o sürümde izin/sonuç başlatıcıları
     // "Can only use lower 16 bits for requestCode" hatasıyla çöker.
     implementation("androidx.fragment:fragment:1.8.9")
+    implementation("androidx.credentials:credentials:1.6.0")
     implementation("androidx.camera:camera-camera2:1.5.3")
     implementation("androidx.camera:camera-lifecycle:1.5.3")
     implementation("androidx.camera:camera-view:1.5.3")

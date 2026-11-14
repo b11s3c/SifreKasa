@@ -1,6 +1,10 @@
 package dev.sifrekasa.data
 
+import android.os.SystemClock
 import android.util.AtomicFile
+import dev.sifrekasa.core.autofill.DomainMatcher
+import dev.sifrekasa.core.passkey.Passkey
+import java.util.UUID
 import dev.sifrekasa.core.crypto.CryptoEngine
 import dev.sifrekasa.core.crypto.KdfParams
 import dev.sifrekasa.core.crypto.Secrets
@@ -40,6 +44,9 @@ class VaultRepository(private val file: File, private val engine: CryptoEngine) 
     private val guard = Any()
     private var dek: ByteArray? = null
     private var keySlot: KeySlot? = null
+
+    @Volatile
+    private var lastUnlockAt = 0L
 
     private val _state = MutableStateFlow<VaultState>(if (file.exists()) VaultState.Locked else VaultState.NoVault)
     val state: StateFlow<VaultState> = _state.asStateFlow()
@@ -129,6 +136,37 @@ class VaultRepository(private val file: File, private val engine: CryptoEngine) 
         data.copy(entries = data.entries.filterNot { it.id == id })
     }
 
+    /** Kasa son [withinMs] içinde (parola ya da biyometriyle) açıldıysa true: kullanıcı az önce doğrulandı. */
+    fun unlockedWithin(withinMs: Long): Boolean =
+        state.value is VaultState.Unlocked && SystemClock.elapsedRealtime() - lastUnlockAt <= withinMs
+
+    /**
+     * Yeni geçiş anahtarını kaydeder: aynı site ve kullanıcı adına sahip, geçiş anahtarı olmayan bir
+     * kayıt varsa ona bağlar; yoksa yeni kayıt açar.
+     */
+    suspend fun savePasskey(passkey: Passkey) = mutate { data ->
+        val now = System.currentTimeMillis()
+        val target = data.entries.firstOrNull { entry ->
+            entry.passkey == null && entry.username.equals(passkey.userName, ignoreCase = true) &&
+                (DomainMatcher.matches(entry.url, passkey.rpId) || DomainMatcher.matches(passkey.rpId, entry.url))
+        }
+        if (target != null) {
+            data.copy(entries = data.entries.map { if (it.id == target.id) it.copy(passkey = passkey, updatedAt = now) else it })
+        } else {
+            data.copy(
+                entries = data.entries + LoginEntry(
+                    id = UUID.randomUUID().toString(),
+                    title = passkey.rpName.ifBlank { passkey.rpId },
+                    username = passkey.userName,
+                    url = "https://${passkey.rpId}",
+                    createdAt = now,
+                    updatedAt = now,
+                    passkey = passkey,
+                )
+            )
+        }
+    }
+
     /** Yedekleme anahtarını kaydeder ya da (null ile) siler. */
     suspend fun setBackup(config: BackupConfig?) = mutate { it.copy(backup = config) }
 
@@ -198,6 +236,7 @@ class VaultRepository(private val file: File, private val engine: CryptoEngine) 
             Secrets.wipe(dek)
             dek = newDek
             keySlot = slot
+            lastUnlockAt = SystemClock.elapsedRealtime()
             _state.value = VaultState.Unlocked(data)
         }
     }

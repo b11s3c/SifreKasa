@@ -19,6 +19,8 @@ dependencies {
     testImplementation("net.java.dev.jna:jna:5.19.1")
     // Yalnızca testlerde: libsodium çıktısını bağımsız uygulamalarla çapraz doğrulamak için.
     testImplementation("org.bouncycastle:bcprov-jdk18on:1.87")
+    // Yalnızca testlerde: ürettiğimiz WebAuthn yanıtlarını bağımsız bir sunucu kütüphanesiyle doğrulamak için.
+    testImplementation("com.webauthn4j:webauthn4j-core:0.32.0.RELEASE")
     testImplementation("com.google.crypto.tink:tink:1.24.0")
 }
 

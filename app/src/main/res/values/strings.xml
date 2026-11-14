@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Şifre Kasa</string>
+    <string name="autofill_prompt">Şifre Kasa ile doldur</string>
+    <string name="passkey_unlock">Şifre Kasa\'nın kilidini aç</string>
 </resources>

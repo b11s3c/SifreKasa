@@ -14,6 +14,29 @@ object BiometricAuth {
         BiometricManager.from(context).canAuthenticate(BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
 
     /**
+     * Kasa zaten açıkken hassas bir işlem (geçiş anahtarıyla oturum açma gibi) öncesi kullanıcıyı
+     * yeniden doğrular: güçlü biyometri ya da cihazın ekran kilidi.
+     */
+    fun verifyUser(activity: FragmentActivity, title: String, subtitle: String, onSuccess: () -> Unit, onFailure: (String?) -> Unit) {
+        val callback = object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) = onSuccess()
+
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                val cancelled = errorCode == BiometricPrompt.ERROR_USER_CANCELED ||
+                    errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON ||
+                    errorCode == BiometricPrompt.ERROR_CANCELED
+                onFailure(if (cancelled) null else errString.toString())
+            }
+        }
+        val info = BiometricPrompt.PromptInfo.Builder()
+            .setTitle(title)
+            .setSubtitle(subtitle)
+            .setAllowedAuthenticators(BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+            .build()
+        BiometricPrompt(activity, ContextCompat.getMainExecutor(activity), callback).authenticate(info)
+    }
+
+    /**
      * [cipher] yalnızca biyometrik doğrulama başarılı olursa kullanılabilir hale gelir (CryptoObject).
      * [onFailure] iletisi kullanıcı iptalinde null'dır.
      */

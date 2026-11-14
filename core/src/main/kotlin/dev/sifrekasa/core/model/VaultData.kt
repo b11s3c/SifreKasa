@@ -1,5 +1,6 @@
 package dev.sifrekasa.core.model
 
+import dev.sifrekasa.core.passkey.Passkey
 import dev.sifrekasa.core.totp.TotpConfig
 import kotlinx.serialization.Serializable
 
@@ -15,6 +16,8 @@ data class LoginEntry(
     val updatedAt: Long = 0,
     /** Bu kayda bağlı 2FA (TOTP) ayarı; yoksa null. */
     val totp: TotpConfig? = null,
+    /** Bu kayda bağlı geçiş anahtarı; yoksa null. */
+    val passkey: Passkey? = null,
 ) {
     // Yanlışlıkla loglanırsa gizli alanlar görünmesin.
     override fun toString(): String = "LoginEntry(id=$id)"
