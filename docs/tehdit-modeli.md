@@ -63,6 +63,12 @@ anahtar cihazdan çıkarılamaz, dolayısıyla yedeklenemez ve telefon kaybolunc
 da kaybolur. Karşılığında anahtarlar "eşitlenen" sınıftadır; yanıtlarda yedeklenebilir/yedeklendi
 bayrakları (BE/BS) buna göre işaretlenir, imza sayacı tutulmaz ve cihaz kanıtı (attestation) verilmez.
 
+**PRF uzantısı.** Bazı siteler ve uygulamalar (ör. şifreli sohbet yedekleri) geçiş anahtarından bir
+şifreleme anahtarı türetir. Her geçiş anahtarının bu iş için ayrı, rastgele bir gizli değeri vardır;
+çıktı = HMAC-SHA-256(gizli değer, SHA-256("WebAuthn PRF" ‖ 0x00 ‖ girdi)). Bu değer de kasada ve şifreli
+yedekte durur. Geçiş anahtarı silinirse ondan türetilen anahtarlar bir daha üretilemez: o anahtarla
+şifrelenmiş veri (ör. yedek) kalıcı olarak açılamaz hale gelir.
+
 Bilgisayardaki tarayıcının gösterdiği QR ile oturum açmada (hybrid akış) Bluetooth yakınlık denetimi
 ve şifreli tünel Android / Play Services tarafından yürütülür; Şifre Kasa'ya istek, çağıranı Play
 Services olan sıradan bir istek olarak ulaşır ve yukarıdaki kurallar aynen geçerlidir.

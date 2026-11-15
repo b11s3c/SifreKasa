@@ -92,7 +92,8 @@ Yedek anahtarı dışa aktarılan JSON'a yazılmaz ve içe aktarılan dosyadan a
         "passkey": {
           "credentialId": "base64url", "rpId": "example.com", "rpName": "",
           "userHandle": "base64url", "userName": "", "userDisplayName": "",
-          "privateKey": "PKCS#8 DER (P-256), Base64", "createdAt": 0
+          "privateKey": "PKCS#8 DER (P-256), Base64", "createdAt": 0,
+          "prfKey": "32 bayt, Base64 (PRF uzantısı için; eski anahtarlarda null)"
         }
       }
     ]

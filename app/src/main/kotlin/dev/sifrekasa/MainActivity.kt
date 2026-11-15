@@ -14,12 +14,12 @@ import dev.sifrekasa.ui.SifreKasaTheme
 class MainActivity : FragmentActivity() {
     private val container get() = (application as SifreKasaApp).container
 
-    /** Yalnızca hata ayıklama derlemesinde bağlantıyla gelen gönderme isteği (bkz. src/debug/AndroidManifest.xml). */
+    /** Telefonun QR okuyucusundan `sifrekasa://send` bağlantısıyla gelen gönderme isteği. */
     private val debugSendUri = mutableStateOf<String?>(null)
     private val debuggable get() = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 
     private fun readDebugLink(intent: Intent?) {
-        if (debuggable && intent?.action == Intent.ACTION_VIEW) debugSendUri.value = intent.dataString
+        if (intent?.action == Intent.ACTION_VIEW) debugSendUri.value = intent.dataString
     }
 
     override fun onNewIntent(intent: Intent) {

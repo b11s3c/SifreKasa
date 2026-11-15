@@ -59,6 +59,7 @@ fun SendScreen(
     container: AppContainer,
     activity: FragmentActivity,
     request: SendRequest,
+    external: Boolean,
     entries: List<LoginEntry>,
     onClose: () -> Unit,
 ) {
@@ -124,6 +125,14 @@ fun SendScreen(
                     style = MaterialTheme.typography.bodySmall,
                 )
                 Text("Aktarıcı: $relayHost", style = MaterialTheme.typography.bodySmall)
+                if (external) {
+                    Text(
+                        "Bu istek uygulamanın dışından (bir bağlantı ya da başka bir QR okuyucu) geldi. " +
+                            "Az önce kendi bilgisayarındaki eklentinin QR'ını okutmadıysan gönderme.",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             }
 

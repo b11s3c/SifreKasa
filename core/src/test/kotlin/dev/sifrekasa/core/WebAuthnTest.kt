@@ -214,6 +214,61 @@ class WebAuthnTest {
         assertNull(VaultData(entries = listOf(LoginEntry("2"))).entries.single().passkey)
     }
 
+    /** PRF uzantısı: geçiş anahtarından şifreleme anahtarı türeten siteler/uygulamalar (ör. şifreli yedekler) için. */
+    @Test
+    fun prfExtensionIsDeterministicPerCredentialAndInput() {
+        fun withExtensions(json: String, extensions: String) = json.trimEnd().dropLast(1) + ""","extensions":$extensions}"""
+        fun prf(responseJson: String) = Json.parseToJsonElement(responseJson).jsonObject.getValue("clientExtensionResults").jsonObject["prf"]?.jsonObject
+        val c = challenge(47)
+        val input1 = Base64Url.encode("yedek anahtarı girdisi".toByteArray())
+        val input2 = Base64Url.encode(ByteArray(32) { 9 })
+
+        // Kayıt: uzantı istenirse "enabled" bildirilir; istenmezse hiç yer almaz.
+        val created = WebAuthn.create(withExtensions(creationJson(c), """{"prf":{}}"""), webOrigin, null, null, emptyList(), 0)
+        assertEquals("true", prf(created.responseJson)!!.getValue("enabled").jsonPrimitive.content)
+        assertNull(prf(created.responseJson)!!["results"])
+        assertNull(prf(WebAuthn.create(creationJson(c), webOrigin, null, null, emptyList(), 0).responseJson))
+        val passkey = created.passkey
+        manager.verify(manager.parseRegistrationResponseJSON(created.responseJson), RegistrationParameters(server(webOrigin, c), es256, true, true))
+
+        fun evaluate(key: Passkey, extensions: String) =
+            prf(WebAuthn.assert(key, withExtensions(requestJson(c), extensions), webOrigin, null, null))?.getValue("results")?.jsonObject
+
+        val first = evaluate(passkey, """{"prf":{"eval":{"first":"$input1"}}}""")!!
+        // Bağımsız hesap (Bouncy Castle): HMAC-SHA-256(prfKey, SHA-256("WebAuthn PRF" ‖ 0x00 ‖ girdi)).
+        val salt = java.security.MessageDigest.getInstance("SHA-256").digest("WebAuthn PRF".toByteArray() + 0 + Base64Url.decode(input1))
+        val mac = org.bouncycastle.crypto.macs.HMac(org.bouncycastle.crypto.digests.SHA256Digest())
+        mac.init(org.bouncycastle.crypto.params.KeyParameter(java.util.Base64.getDecoder().decode(passkey.prfKey)))
+        mac.update(salt, 0, salt.size)
+        val expected = ByteArray(32).also { mac.doFinal(it, 0) }
+        assertEquals(Base64Url.encode(expected), first.getValue("first").jsonPrimitive.content)
+        assertNull(first["second"])
+
+        // Aynı girdi → aynı çıktı (yedeğin sonradan açılabilmesi buna bağlı); farklı girdi → farklı çıktı.
+        assertEquals(first, evaluate(passkey, """{"prf":{"eval":{"first":"$input1"}}}"""))
+        val both = evaluate(passkey, """{"prf":{"eval":{"first":"$input1","second":"$input2"}}}""")!!
+        assertEquals(first.getValue("first"), both.getValue("first"))
+        assertFalse(both.getValue("first") == both.getValue("second"))
+
+        // evalByCredential, seçilen kimlik için eval'in önüne geçer; başka kimliğin girdisi kullanılmaz.
+        val byCredential = evaluate(passkey, """{"prf":{"eval":{"first":"$input1"},"evalByCredential":{"${passkey.credentialId}":{"first":"$input2"}}}}""")!!
+        assertEquals(both.getValue("second"), byCredential.getValue("first"))
+        val otherCredential = evaluate(passkey, """{"prf":{"eval":{"first":"$input1"},"evalByCredential":{"${Base64Url.encode(ByteArray(32))}":{"first":"$input2"}}}}""")!!
+        assertEquals(first.getValue("first"), otherCredential.getValue("first"))
+
+        // Başka bir anahtar aynı girdiyle farklı çıktı verir; uzantı istenmezse ya da eski anahtarda sonuç yoktur.
+        val other = WebAuthn.create(withExtensions(creationJson(c), """{"prf":{}}"""), webOrigin, null, null, emptyList(), 0).passkey
+        assertFalse(first == evaluate(other, """{"prf":{"eval":{"first":"$input1"}}}"""))
+        assertNull(prf(WebAuthn.assert(passkey, requestJson(c), webOrigin, null, null)))
+        assertNull(evaluate(passkey.copy(prfKey = null), """{"prf":{"eval":{"first":"$input1"}}}"""))
+        assertFalse(passkey.toString().contains(passkey.prfKey!!))
+
+        // PRF'li yanıt da sunucu doğrulamasından geçmeli.
+        val assertion = WebAuthn.assert(passkey, withExtensions(requestJson(c), """{"prf":{"eval":{"first":"$input1"}}}"""), webOrigin, null, null)
+        val record = manager.parseRegistrationResponseJSON(created.responseJson).let { CredentialRecordImpl(it.attestationObject!!, it.collectedClientData, it.clientExtensions, it.transports) }
+        manager.verify(manager.parseAuthenticationResponseJSON(assertion), AuthenticationParameters(server(webOrigin, c), record, null, true, true))
+    }
+
     @Test
     fun domainMatcherIsStrict() {
         assertTrue(DomainMatcher.matches("https://example.com/login", "example.com"))

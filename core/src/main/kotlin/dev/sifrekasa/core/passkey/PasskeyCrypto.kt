@@ -33,6 +33,12 @@ object PasskeyCrypto {
         }
     }
 
+    fun hmacSha256(key: ByteArray, data: ByteArray): ByteArray =
+        javax.crypto.Mac.getInstance("HmacSHA256").run {
+            init(javax.crypto.spec.SecretKeySpec(key, "HmacSHA256"))
+            doFinal(data)
+        }
+
     fun sha256(data: ByteArray): ByteArray = MessageDigest.getInstance("SHA-256").digest(data)
 
     /** COSE_Key (RFC 9052): kty=EC2, alg=ES256, crv=P-256, x, y. */

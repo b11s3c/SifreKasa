@@ -13,7 +13,10 @@ aktarıcı `relay/src/index.js`.
 2. **QR**: `sifrekasa://send?v=1&r=<aktarıcı>&s=<oturum>&k=<açık anahtar>&d=<alan adı>&e=<bitiş>`
    Alan adı, isteği başlatan sekmenin adresinden alınır (sayfanın içeriğinden değil). `e`, 60 saniye
    sonrasının Unix zamanıdır.
-3. **Telefon**: QR'ı okur; sürümü, uzunlukları, süreyi ve aktarıcı adresini doğrular. Alan adını
+   Süre dolunca eklenti yeni anahtar ve yeni oturum kimliğiyle QR'ı kendiliğinden yeniler (pencere açık
+   kaldıkça en çok 10 kez).
+3. **Telefon**: QR'ı uygulamanın içinden ya da telefonun kendi QR okuyucusundan (`sifrekasa://send`
+   bağlantısı uygulamayı açar) okur; sürümü, uzunlukları, süreyi ve aktarıcı adresini doğrular. Alan adını
    gösterir, eşleşen kayıtları önerir, biyometri ya da ekran kilidiyle onay ister.
 4. **Şifreleme** (telefon; ilkeller Tink'ten):
 
@@ -64,6 +67,11 @@ görür; hiçbir şey loglamaz.
   bilgisi ona gider. Önlemler: telefon alan adını büyük harflerle gösterir, yalnızca o alan adıyla
   eşleşen kayıtları önerir, aktarıcı sabitlemesi başka aktarıcıları reddeder ve her gönderim için onay
   ister. **Yalnızca kendi bilgisayarındaki eklentinin gösterdiği QR'ı okut.**
+- **Bağlantıyla açılma.** `sifrekasa://send` bağlantısını telefondaki herhangi bir uygulama ya da web
+  sayfası da açabilir. Bağlantı tek başına hiçbir şey göndermez: kasa kilidi, alan adı gösterimi, kayıt
+  seçimi ve biyometrik onay yine gerekir; ekranda isteğin uygulama dışından geldiği kırmızı bir uyarıyla
+  belirtilir. Yine de bu yol, sahte QR riskini bir bağlantıya tıklamaya kadar indirir: kendi eklentinin
+  QR'ını az önce okutmadıysan çıkan gönderme ekranını onaylama.
 - **Sayfadaki betikler.** Form doldurulduktan sonra değerler sayfanın kendi betiklerine açıktır; bu,
   şifreyi elle yazmakla aynıdır.
 - **Gömülü çerçeveler.** Giriş formu başka bir kökenden gelen bir çerçevedeyse doldurulmaz.

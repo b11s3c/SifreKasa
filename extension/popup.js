@@ -6,6 +6,9 @@ import { fillLogin } from "./fill.js";
 const api = globalThis.browser ?? globalThis.chrome;
 const LIFETIME_SECONDS = 60;
 const POLL_MS = 1000;
+// Süre dolunca QR kendiliğinden yenilenir; pencere açık unutulursa aktarıcıyı sonsuza dek yoklamasın diye sınırlıdır.
+const MAX_AUTO_RENEWALS = 10;
+let renewals = 0;
 const $ = (id) => document.getElementById(id);
 
 function setStatus(text, kind = "") {
@@ -70,9 +73,17 @@ async function start() {
     $("qr").hidden = true;
     $("hint").hidden = true;
     if (!message) {
+      if (renewals < MAX_AUTO_RENEWALS) {
+        renewals += 1;
+        session = null;
+        // Eski oturumun anahtarı bırakıldı; yeni anahtar ve yeni oturum kimliğiyle yeni QR.
+        setTimeout(start, 0);
+        return;
+      }
       $("retry").hidden = false;
       return setStatus("Süre doldu.", "error");
     }
+    renewals = 0;
 
     const data = await openMessage(session, message, domain);
 
@@ -105,6 +116,9 @@ async function start() {
   }
 }
 
-$("retry").onclick = start;
+$("retry").onclick = () => {
+  renewals = 0;
+  start();
+};
 $("options").onclick = () => api.runtime.openOptionsPage();
 start();

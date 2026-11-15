@@ -3,6 +3,9 @@ package dev.sifrekasa.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -119,8 +122,21 @@ fun VaultListScreen(
                             trailingContent = entry.totp?.let { totp ->
                                 {
                                     val code = Totp.code(totp, now)
-                                    TextButton(onClick = { onCopyCode(code) }) {
-                                        Text(formatCode(code), fontFamily = FontFamily.Monospace)
+                                    val remaining = Totp.secondsRemaining(totp, now)
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        TextButton(onClick = { onCopyCode(code) }) {
+                                            Text(formatCode(code), fontFamily = FontFamily.Monospace)
+                                        }
+                                        // Kodun yenilenmesine kalan süre; son 5 saniyede renk değişir.
+                                        Box(contentAlignment = Alignment.Center) {
+                                            CircularProgressIndicator(
+                                                progress = { remaining / totp.period.toFloat() },
+                                                color = if (remaining <= 5) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                                                strokeWidth = 3.dp,
+                                                modifier = Modifier.size(30.dp),
+                                            )
+                                            Text("$remaining", style = MaterialTheme.typography.labelSmall)
+                                        }
                                     }
                                 }
                             },

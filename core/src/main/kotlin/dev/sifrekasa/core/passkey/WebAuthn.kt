@@ -64,6 +64,7 @@ object WebAuthn {
     private const val BASE_FLAGS = FLAG_UP or FLAG_UV or FLAG_BE or FLAG_BS
     private const val ES256 = -7
     private val AAGUID = ByteArray(16)
+    private val PRF_PREFIX = "WebAuthn PRF".toByteArray(Charsets.UTF_8) + 0
     private val PLACEHOLDER_CLIENT_DATA = "{}".toByteArray()
     private val json = Json { ignoreUnknownKeys = true }
     private val random = SecureRandom()
@@ -122,6 +123,8 @@ object WebAuthn {
         }
 
         val credentialId = ByteArray(32).also(random::nextBytes)
+        val prfKey = ByteArray(32).also(random::nextBytes)
+        val prfInput = prfInput(optionsJson, credentialId = null)
         val key = PasskeyCrypto.generate()
         val coseKey = PasskeyCrypto.coseKey(key.publicKey)
         val attested = ByteBuffer.allocate(AAGUID.size + 2 + credentialId.size + coseKey.size)
@@ -152,6 +155,12 @@ object WebAuthn {
             }
             putJsonObject("clientExtensionResults") {
                 putJsonObject("credProps") { put("rk", true) }
+                if (prfInput != null) {
+                    putJsonObject("prf") {
+                        put("enabled", true)
+                        prfResults(prfKey, prfInput)?.let { put("results", it) }
+                    }
+                }
             }
         }
         val passkey = Passkey(
@@ -163,7 +172,9 @@ object WebAuthn {
             userDisplayName = options.userDisplayName,
             privateKey = Base64.getEncoder().encodeToString(key.privateKeyPkcs8),
             createdAt = now,
+            prfKey = Base64.getEncoder().encodeToString(prfKey),
         )
+        prfKey.fill(0)
         key.privateKeyPkcs8.fill(0)
         return CreatedPasskey(passkey, response.toString())
     }
@@ -198,8 +209,42 @@ object WebAuthn {
                 put("signature", Base64Url.encode(signature))
                 put("userHandle", passkey.userHandle)
             }
-            putJsonObject("clientExtensionResults") {}
+            putJsonObject("clientExtensionResults") {
+                val prfKey = passkey.prfKey?.let { Base64.getDecoder().decode(it) }
+                val results = prfKey?.let { key ->
+                    prfInput(optionsJson, passkey.credentialId)?.let { prfResults(key, it) }.also { key.fill(0) }
+                }
+                if (results != null) putJsonObject("prf") { put("results", results) }
+            }
         }.toString()
+    }
+
+    /**
+     * İstekteki PRF uzantısı girdisi (WebAuthn Düzey 3, §10.1.4). Uzantı istenmemişse null;
+     * istenmiş ama değerlendirme girdisi verilmemişse boş nesne döner.
+     * `evalByCredential` içinde seçilen kimlik için girdi varsa `eval`'in önüne geçer.
+     */
+    private fun prfInput(optionsJson: String, credentialId: String?): JsonObject? {
+        val prf = (parse(optionsJson)["extensions"] as? JsonObject)?.get("prf") as? JsonObject ?: return null
+        val byCredential = (prf["evalByCredential"] as? JsonObject)?.entries
+            ?.firstOrNull { credentialId != null && normalizeIdOrNull(it.key) == credentialId }?.value as? JsonObject
+        return byCredential ?: prf["eval"] as? JsonObject ?: JsonObject(emptyMap())
+    }
+
+    /**
+     * çıktı = HMAC-SHA-256(anahtara özgü gizli değer, SHA-256("WebAuthn PRF" ‖ 0x00 ‖ girdi)).
+     * Aynı anahtar ve girdi her zaman aynı çıktıyı verir; çıktı imza anahtarından bağımsızdır.
+     */
+    private fun prfResults(prfKey: ByteArray, input: JsonObject): JsonObject? {
+        fun evaluate(name: String): String? {
+            val salt = input.string(name)?.let { runCatching { Base64Url.decode(it) }.getOrNull() } ?: return null
+            return Base64Url.encode(PasskeyCrypto.hmacSha256(prfKey, PasskeyCrypto.sha256(PRF_PREFIX + salt)))
+        }
+        val first = evaluate("first") ?: return null
+        return buildJsonObject {
+            put("first", first)
+            evaluate("second")?.let { put("second", it) }
+        }
     }
 
     /** rpIdHash(32) || bayraklar(1) || imza sayacı(4, hep 0: eşitlenen anahtarlarda sayaç tutulmaz) [|| attested]. */

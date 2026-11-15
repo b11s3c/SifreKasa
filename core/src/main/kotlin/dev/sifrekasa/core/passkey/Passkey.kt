@@ -21,6 +21,11 @@ data class Passkey(
     /** P-256 özel anahtarı, PKCS#8 DER, Base64. */
     val privateKey: String,
     val createdAt: Long = 0,
+    /**
+     * PRF uzantısı için bu anahtara özgü 32 baytlık gizli değer (Base64). Sitelerin geçiş anahtarından
+     * şifreleme anahtarı türetmesini sağlar. Bu alan eklenmeden önce oluşturulmuş anahtarlarda null'dır.
+     */
+    val prfKey: String? = null,
 ) {
     override fun toString(): String = "Passkey(rpId=$rpId)"
 }

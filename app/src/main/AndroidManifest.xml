@@ -107,10 +107,22 @@
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale|layoutDirection|locale"
             android:exported="true"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!--
+                Tarayıcı eklentisinin QR'ı telefonun kendi QR okuyucusuyla okutulduğunda gönderme ekranını açar.
+                Bağlantı tek başına hiçbir şey göndermez: kasa kilidi, alan adı gösterimi, kayıt seçimi ve
+                biyometrik onay yine gerekir; ekranda isteğin uygulama dışından geldiği belirtilir.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="sifrekasa" android:host="send" />
             </intent-filter>
         </activity>
 

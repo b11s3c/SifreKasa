@@ -20,7 +20,7 @@ private sealed interface Screen {
     data object List : Screen
     data class Edit(val id: String?, val prefill: OtpAuthEntry? = null) : Screen
     data object ScanNew : Screen
-    data class Send(val request: SendRequest) : Screen
+    data class Send(val request: SendRequest, val external: Boolean = false) : Screen
     data object Settings : Screen
 }
 
@@ -40,13 +40,30 @@ fun AppRoot(
         if (unlocked) container.lockManager.onUserInteraction() else screen = Screen.List
     }
 
-    // Hata ayıklama derlemesinde bağlantıyla gelen istek, kasa açılınca işlenir.
+    // Telefonun QR okuyucusundan bağlantıyla gelen istek, kasa açılınca işlenir.
+    var linkError by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(pendingSendUri, unlocked) {
         if (pendingSendUri != null && unlocked) {
-            runCatching { SendRequest.parse(pendingSendUri, System.currentTimeMillis() / 1000, allowInsecureLocalRelay) }
-                .onSuccess { screen = Screen.Send(it) }
+            try {
+                screen = Screen.Send(
+                    SendRequest.parse(pendingSendUri, System.currentTimeMillis() / 1000, allowInsecureLocalRelay),
+                    external = true,
+                )
+            } catch (e: SendException) {
+                linkError = e.message
+            }
             onSendUriConsumed()
         }
+    }
+    linkError?.let { message ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { linkError = null },
+            title = { androidx.compose.material3.Text("Gönderme isteği açılamadı") },
+            text = { androidx.compose.material3.Text(message) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = { linkError = null }) { androidx.compose.material3.Text("Tamam") }
+            },
+        )
     }
 
     when (val current = state) {
@@ -95,6 +112,7 @@ fun AppRoot(
                 container = container,
                 activity = activity,
                 request = s.request,
+                external = s.external,
                 entries = current.data.entries,
                 onClose = { screen = Screen.List },
             )

@@ -66,6 +66,8 @@ fun BackupSection(container: AppContainer) {
     var pendingExport by remember { mutableStateOf<ByteArray?>(null) }
     var pendingBackup by remember { mutableStateOf<ByteArray?>(null) }
     var pendingImport by remember { mutableStateOf<ByteArray?>(null) }
+    // true: mevcut yedekleme için yalnızca konum değiştiriliyor; seçim iptal edilirse hiçbir şey bozulmaz.
+    var changingLocation by remember { mutableStateOf(false) }
 
     fun report(text: String, error: Boolean = false) {
         message = text
@@ -87,26 +89,30 @@ fun BackupSection(container: AppContainer) {
 
     val backupPicker = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(SKX_MIME)) { uri ->
         val bytes = pendingBackup
+        val changing = changingLocation
         pendingBackup = null
+        changingLocation = false
         busy = true
         scope.launch {
             if (uri == null || bytes == null) {
-                // Konum seçilmedi: yarım kalan kurulumu geri al.
-                vault.setBackup(null)
+                // Konum seçilmedi: ilk kurulumsa yarım kalan kurulumu geri al; konum değişikliğiyse eskisi kalır.
+                if (!changing) vault.setBackup(null)
                 busy = false
                 return@launch
             }
+            val previous = backup.location
             try {
                 backup.adoptLocation(uri)
+                if (changing && previous != null && previous != uri) backup.releaseLocation(previous)
             } catch (e: SecurityException) {
-                vault.setBackup(null)
+                if (!changing) vault.setBackup(null)
                 busy = false
                 report("Bu konum kalıcı erişime izin vermiyor. Başka bir konum seç.", error = true)
                 return@launch
             }
             val error = backup.backupTo(uri, bytes)
             busy = false
-            if (error == null) report("Yedekleme kuruldu; ilk yedek yazıldı ve doğrulandı.") else report(error, error = true)
+            if (error == null) report(if (changing) "Yedek konumu değişti; yedek yeni konuma yazıldı ve doğrulandı." else "Yedekleme kuruldu; ilk yedek yazıldı ve doğrulandı.") else report(error, error = true)
         }
     }
 
@@ -149,8 +155,9 @@ fun BackupSection(container: AppContainer) {
         Text("Yedekleme", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 12.dp))
         if (!backupConfigured) {
             Text(
-                "Aynı şifreli dosyayı seçtiğin bir konuma (ör. Google Drive) yazar ve kasa değiştikçe günceller. " +
-                    "Uygulama internete bağlanmaz; yüklemeyi seçtiğin konumun kendi uygulaması yapar.",
+                "Aynı şifreli dosyayı seçtiğin bir konuma yazar ve kasa değiştikçe günceller. Google Drive için açılan " +
+                    "kaydetme ekranında sol üstteki menüden (☰) Drive'ı seç; varsayılan konum telefonun depolamasıdır. " +
+                    "Uygulama yedek için internete bağlanmaz; yüklemeyi seçtiğin konumun kendi uygulaması yapar.",
                 style = MaterialTheme.typography.bodySmall,
             )
             OutlinedButton(enabled = !busy, onClick = { dialog = BackupDialog.BACKUP_PASSWORD }) { Text("Yedeklemeyi kur") }
@@ -195,6 +202,20 @@ fun BackupSection(container: AppContainer) {
                         }
                     },
                 ) { Text("Şimdi yedekle") }
+                OutlinedButton(
+                    enabled = !busy,
+                    onClick = {
+                        val bytes = vault.sealBackup()
+                        if (bytes != null) {
+                            pendingBackup = bytes
+                            changingLocation = true
+                            container.lockManager.expectExternalActivity()
+                            backupPicker.launch("sifrekasa-yedek.${ExportFormat.FILE_EXTENSION}")
+                        }
+                    },
+                ) { Text("Konumu değiştir") }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextButton(enabled = !busy, onClick = { dialog = BackupDialog.CONFIRM_DISABLE }) { Text("Yedeklemeyi kapat") }
             }
         }
