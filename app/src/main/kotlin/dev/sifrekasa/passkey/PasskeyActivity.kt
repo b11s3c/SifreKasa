@@ -104,7 +104,7 @@ class PasskeyActivity : FragmentActivity() {
                 var message by remember { mutableStateOf<String?>(null) }
                 var nativeConfirmed by remember { mutableStateOf(nativeCaller == null) }
                 when (state) {
-                    VaultState.NoVault -> Info("Önce Şifre Kasa uygulamasını açıp kasanı oluştur.", onClose = ::cancel)
+                    VaultState.NoVault -> Info("Önce ŞifreKasa uygulamasını açıp kasanı oluştur.", onClose = ::cancel)
                     VaultState.Locked -> UnlockScreen(container, this)
                     is VaultState.Unlocked -> when (action) {
                         PasskeyRequests.ACTION_UNLOCK -> {
@@ -135,7 +135,7 @@ class PasskeyActivity : FragmentActivity() {
         if (container.vault.unlockedWithin(RECENT_UNLOCK_MS)) {
             block()
         } else {
-            BiometricAuth.verifyUser(this, "Şifre Kasa", "Geçiş anahtarını kullanmak için doğrula", onSuccess = block, onFailure = onDenied)
+            BiometricAuth.verifyUser(this, "ŞifreKasa", "Geçiş anahtarını kullanmak için doğrula", onSuccess = block, onFailure = onDenied)
         }
     }
 
@@ -282,7 +282,7 @@ private fun CreateConfirmation(options: CreationOptions, message: String?, onCon
             if (options.rpName.isNotBlank()) Text(options.rpName)
             Text("Hesap: ${options.userName.ifBlank { options.userDisplayName }}")
             Text(
-                "Anahtar Şifre Kasa'da saklanır ve şifreli yedeğine dahil olur.",
+                "Anahtar ŞifreKasa'da saklanır ve şifreli yedeğine dahil olur.",
                 style = MaterialTheme.typography.bodySmall,
             )
             message?.let { Text(it, color = MaterialTheme.colorScheme.error) }

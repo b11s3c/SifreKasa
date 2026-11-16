@@ -125,7 +125,7 @@ fun BackupSection(container: AppContainer) {
                         pendingImport = bytes
                         dialog = BackupDialog.IMPORT_PASSWORD
                     } else {
-                        report("Bu dosya bir Şifre Kasa dışa aktarım dosyası değil.", error = true)
+                        report("Bu dosya bir ŞifreKasa dışa aktarım dosyası değil.", error = true)
                     }
                 } catch (e: IOException) {
                     report("Dosya okunamadı: ${e.message}", error = true)

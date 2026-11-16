@@ -1,6 +1,6 @@
 # Tehdit modeli
 
-Bu belge Şifre Kasa'nın neye karşı koruduğunu, neye karşı korumadığını ve hangi varsayımlara
+Bu belge ŞifreKasa'nın neye karşı koruduğunu, neye karşı korumadığını ve hangi varsayımlara
 dayandığını anlatır.
 
 ## Korunan varlıklar
@@ -39,7 +39,7 @@ dayandığını anlatır.
 
 | Tehdit | Önlem | Kalan risk |
 |---|---|---|
-| Servisin arka planda veri sızdırması | Servis kasaya dokunmaz; yanıtında yalnızca değer taşımayan "Şifre Kasa ile doldur" seçeneği vardır. Değerler, kullanıcı kilidi açıp kaydı seçtikten sonra seçim ekranından verilir | — |
+| Servisin arka planda veri sızdırması | Servis kasaya dokunmaz; yanıtında yalnızca değer taşımayan "ŞifreKasa ile doldur" seçeneği vardır. Değerler, kullanıcı kilidi açıp kaydı seçtikten sonra seçim ekranından verilir | — |
 | Oltalama sitesi | Kayıt yalnızca alan adı aynıysa ya da kayıttaki alan adının alt alan adıysa önerilir; benzer adlar eşleşmez | Kullanıcı "başka bir kayıt ara" ile elle yanlış siteye doldurabilir; ekranda uyarı gösterilir |
 | Sahte tarayıcının yanlış alan adı bildirmesi | Bildirilen alan adına yalnızca Google'ın açık listesindeki ve imza sertifikası tutan tarayıcılarda güvenilir | Listede olmayan tarayıcılar uygulama gibi işlenir (otomatik eşleşme yok) |
 | Sayfadaki gömülü çerçeveler (iframe) | Formda birden fazla farklı alan adı görülürse hiçbiri kullanılmaz, otomatik eşleşme yapılmaz | — |
@@ -70,7 +70,7 @@ yedekte durur. Geçiş anahtarı silinirse ondan türetilen anahtarlar bir daha 
 şifrelenmiş veri (ör. yedek) kalıcı olarak açılamaz hale gelir.
 
 Bilgisayardaki tarayıcının gösterdiği QR ile oturum açmada (hybrid akış) Bluetooth yakınlık denetimi
-ve şifreli tünel Android / Play Services tarafından yürütülür; Şifre Kasa'ya istek, çağıranı Play
+ve şifreli tünel Android / Play Services tarafından yürütülür; ŞifreKasa'ya istek, çağıranı Play
 Services olan sıradan bir istek olarak ulaşır ve yukarıdaki kurallar aynen geçerlidir.
 
 ## Bilgisayara gönderme

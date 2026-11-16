@@ -73,7 +73,7 @@ class AutofillPickerActivity : FragmentActivity() {
             SifreKasaTheme {
                 val state by container.vault.state.collectAsStateWithLifecycle()
                 when (val current = state) {
-                    VaultState.NoVault -> Message("Önce Şifre Kasa uygulamasını açıp kasanı oluştur.")
+                    VaultState.NoVault -> Message("Önce ŞifreKasa uygulamasını açıp kasanı oluştur.")
                     VaultState.Locked -> UnlockScreen(container, this)
                     is VaultState.Unlocked -> Picker(
                         entries = current.data.entries,
@@ -157,7 +157,7 @@ private fun Picker(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Şifre Kasa ile doldur") },
+                title = { Text("ŞifreKasa ile doldur") },
                 actions = { TextButton(onClick = onCancel) { Text("Vazgeç") } },
             )
         },

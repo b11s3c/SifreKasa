@@ -20,8 +20,8 @@ android {
         applicationId = "dev.sifrekasa"
         minSdk = 34
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.1.1"
     }
 
     signingConfigs {
@@ -42,8 +42,9 @@ android {
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.findByName("release")
-            // Android 14+ telefonların tamamı 64 bit ARM'dir; diğer mimarilerin yerel kütüphaneleri alınmaz.
-            ndk { abiFilters += "arm64-v8a" }
+            // libsodium'un sağladığı dört mimari. 32 bit ARM gerekli: bazı Android 14+ telefonlar (ör. Android Go)
+            // 32 bit çalışır. JNA'nın artık kullanılmayan mimarileri (armeabi, mips) dışarıda kalır.
+            ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86") }
         }
     }
 

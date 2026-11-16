@@ -1,4 +1,4 @@
-# Şifre Kasa aktarıcısı
+# ŞifreKasa aktarıcısı
 
 Telefon ile tarayıcı eklentisi arasında tek bir şifreli iletiyi taşıyan küçük bir Cloudflare Worker.
 Yalnızca şifreli veri görür; oturum tek kullanımlıktır ve 60 saniyede silinir. Protokol:

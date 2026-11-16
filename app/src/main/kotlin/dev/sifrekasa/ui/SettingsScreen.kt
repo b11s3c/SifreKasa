@@ -153,8 +153,8 @@ fun SettingsScreen(container: AppContainer, activity: FragmentActivity, onBack: 
             SectionTitle("Otomatik doldurma ve geçiş anahtarları")
             val autofillEnabled = remember { activity.getSystemService(AutofillManager::class.java)?.hasEnabledAutofillServices() == true }
             Text(
-                if (autofillEnabled) "Otomatik doldurma hizmeti: Şifre Kasa (etkin)"
-                else "Diğer uygulamalarda ve tarayıcılarda doldurmak için Şifre Kasa'yı otomatik doldurma hizmeti olarak seç. " +
+                if (autofillEnabled) "Otomatik doldurma hizmeti: ŞifreKasa (etkin)"
+                else "Diğer uygulamalarda ve tarayıcılarda doldurmak için ŞifreKasa'yı otomatik doldurma hizmeti olarak seç. " +
                     "Chrome'da ayrıca Ayarlar > Otomatik doldurma hizmetleri altında \"başka bir hizmetle doldur\" seçilmelidir.",
                 style = MaterialTheme.typography.bodySmall,
             )
@@ -169,7 +169,7 @@ fun SettingsScreen(container: AppContainer, activity: FragmentActivity, onBack: 
                 enabled = !autofillEnabled,
             ) { Text("Otomatik doldurma hizmetini seç") }
             Text(
-                "Geçiş anahtarları için Şifre Kasa'yı sistem ayarlarında sağlayıcı olarak etkinleştir.",
+                "Geçiş anahtarları için ŞifreKasa'yı sistem ayarlarında sağlayıcı olarak etkinleştir.",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 8.dp),
             )

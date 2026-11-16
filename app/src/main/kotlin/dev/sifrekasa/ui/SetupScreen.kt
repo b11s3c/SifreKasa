@@ -60,7 +60,7 @@ fun SetupScreen(vault: VaultRepository) {
                         error = null
                         restoreBytes = bytes
                     } else {
-                        error = "Bu dosya bir Şifre Kasa yedeği değil."
+                        error = "Bu dosya bir ŞifreKasa yedeği değil."
                     }
                 } catch (e: IOException) {
                     error = "Dosya okunamadı: ${e.message}"

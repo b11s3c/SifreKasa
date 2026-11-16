@@ -123,7 +123,7 @@ fun UnlockScreen(container: AppContainer, activity: FragmentActivity) {
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("Şifre Kasa", style = MaterialTheme.typography.headlineMedium)
+            Text("ŞifreKasa", style = MaterialTheme.typography.headlineMedium)
             Text("Kasa kilitli.", style = MaterialTheme.typography.bodyMedium)
             PasswordField(
                 value = password,

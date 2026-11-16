@@ -1,6 +1,6 @@
 # Dosya biçimleri
 
-Şifre Kasa iki ayrı dosya biçimi kullanır. İkisi de aynı kripto ilkellerine dayanır ama farklı
+ŞifreKasa iki ayrı dosya biçimi kullanır. İkisi de aynı kripto ilkellerine dayanır ama farklı
 anahtarlarla şifrelenir ve birbirinin yerine kabul edilmez.
 
 | | Kasa dosyası | Dışa aktarım / yedek dosyası |

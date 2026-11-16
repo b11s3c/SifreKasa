@@ -19,7 +19,7 @@ import dev.sifrekasa.security.PrivilegedApps
 /**
  * Telefondaki uygulama ve tarayıcılarda oturum açma formlarını doldurur.
  *
- * Servis kasaya hiç dokunmaz ve yanıtına hiçbir gizli veri koymaz: yalnızca "Şifre Kasa ile doldur"
+ * Servis kasaya hiç dokunmaz ve yanıtına hiçbir gizli veri koymaz: yalnızca "ŞifreKasa ile doldur"
  * seçeneğini döner. Kullanıcı ona dokununca [AutofillPickerActivity] açılır; kilit açma, kayıt seçimi
  * ve değerlerin forma verilmesi orada, kullanıcının gözü önünde olur.
  */

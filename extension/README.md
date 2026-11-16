@@ -1,6 +1,6 @@
-# Şifre Kasa tarayıcı eklentisi (Manifest V3)
+# ŞifreKasa tarayıcı eklentisi (Manifest V3)
 
-Telefondaki Şifre Kasa'dan QR ile, uçtan uca şifreli olarak etkin sekmedeki giriş formuna şifre alır.
+Telefondaki ŞifreKasa'dan QR ile, uçtan uca şifreli olarak etkin sekmedeki giriş formuna şifre alır.
 Bilgisayarda şifre saklamaz; eklentinin sakladığı tek şey aktarıcının adresidir.
 
 İzinler: `activeTab` (yalnızca simgeye tıkladığın sekme), `scripting` (o sekmedeki formu doldurmak),
@@ -20,7 +20,7 @@ Kurduktan sonra eklentinin ayarlarını açıp aktarıcı adresini gir (bkz. `..
 ## Kullanım
 
 1. Giriş sayfasındayken eklenti simgesine tıkla; QR görünür.
-2. Telefonda Şifre Kasa → **QR tara**. Telefonda gösterilen alan adının adres çubuğundakiyle aynı
+2. Telefonda ŞifreKasa → **QR tara**. Telefonda gösterilen alan adının adres çubuğundakiyle aynı
    olduğunu denetle, kaydı seç, onayla.
 3. Form dolar. Kayıtta 2FA varsa ve sayfada kod alanı yoksa kod pencerede gösterilir.
 
