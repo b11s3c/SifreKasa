@@ -1,6 +1,15 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
+}
+
+// Sürüm imzası: anahtar deposunun yeri ve parolaları depoya girmeyen keystore.properties dosyasından okunur
+// (örnek: keystore.properties.example). Dosya yoksa sürüm derlemesi imzasız üretilir.
+val keystoreProperties = Properties().apply {
+    val file = (findProperty("keystoreProperties") as String?)?.let(::file) ?: rootProject.file("keystore.properties")
+    if (file.exists()) file.inputStream().use(::load)
 }
 
 android {
@@ -13,6 +22,29 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+    }
+
+    signingConfigs {
+        if (keystoreProperties.isNotEmpty()) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            // Hata ayıklanamaz, küçültülmüş ve optimize edilmiş: günlük kullanım için olan derleme budur.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("release")
+            // Android 14+ telefonların tamamı 64 bit ARM'dir; diğer mimarilerin yerel kütüphaneleri alınmaz.
+            ndk { abiFilters += "arm64-v8a" }
+        }
     }
 
     buildFeatures {
