@@ -28,7 +28,7 @@
 
 | ID | Öncelik | Durum | Görev | Kabul Kriteri |
 |---|---|---|---|---|
-| GP-06 | P0 | `IN_PROGRESS` | Gizlilik Politikası (TR + EN) hazırlanması ve herkese açık HTTPS URL'de yayınlanması | `docs/index.html`, `docs/privacy-policy.html`, `docs/.nojekyll` hazır; GitHub push + Repo Settings → Pages (`main` / `/docs`) açılacak |
+| GP-06 | P0 | `DONE` | Gizlilik Politikası (TR + EN) hazırlanması ve herkese açık HTTPS URL'de yayınlanması | `https://b11s3c.github.io/SifreKasa/privacy-policy.html` (`main` / `/docs`, `https_enforced: true`) yayında |
 | GP-07 | P0 | `DONE` | Uygulama içi "Hakkında / Sürüm / Gizlilik Politikası" bölümü (`SettingsScreen`) | `SettingsScreen.kt` içine sürüm (`BuildConfig`), Gizlilik Politikası ve GitHub kaynak kodu bağlantıları eklendi |
 | GP-08 | P0 | `DONE` | Google Play Veri Güvenliği (Data Safety), İzinler, İçerik Derecelendirmesi (IARC) ve İnceleme Notları | `docs/play-store/DATA_SAFETY_AND_REVIEW.md` hazır |
 
@@ -37,14 +37,14 @@
 | ID | Öncelik | Durum | Görev | Kabul Kriteri |
 |---|---|---|---|---|
 | GP-09 | P0 | `DONE` | Mağaza görselleri: 512x512 uygulama ikonu PNG + 1024x500 Özellik Grafiği (Feature Graphic) | `docs/play-store/assets/icon-512.png` ve `feature-graphic-1024x500.png` (RGB, şeffaflıksız) üretildi ve görsel olarak doğrulandı |
-| GP-10 | P0 | `TODO` | Telefon ekran görüntüleri (4–8 adet, Türkçe arayüz) | Kasa listesi, kayıt ekleme/TOTP, şifre üretici, otomatik doldurma, ayarlar/yedekleme akışlarını gösteren temiz ekran görüntüleri hazır (`FLAG_SECURE` için demo/screenshot stratejisiyle) |
+| GP-10 | P0 | `DONE` | Telefon ekran görüntüleri (4–8 adet, Türkçe arayüz) | Pixel 9 emülatöründen yakalanıp 1080×1920 mağaza çerçevesiyle üretilen 5 görsel `docs/play-store/assets/screenshots/` altında hazır ve görsel olarak doğrulandı |
 | GP-11 | P0 | `DONE` | Mağaza metinleri (Başlık ≤30, Kısa Açıklama ≤80, Tam Açıklama ≤4000, Sürüm Notları) | `docs/play-store/LISTING_TR.md` ve `LISTING_EN.md` hazır |
 
 ## Epic 5 — Google Play Console, Kapalı Test ve Canlıya Çıkış
 
 | ID | Öncelik | Durum | Görev | Kabul Kriteri |
 |---|---|---|---|---|
-| GP-12 | P0 | `BLOCKED` | Google Play Console uygulama kaydı ve Play App Signing kurulumu | *(Kullanıcı Google Play Developer hesabı erişimi gerekir)* Uygulama oluşturuldu, yükleme anahtarı (upload key) tanımlandı |
+| GP-12 | P0 | `IN_PROGRESS` | Google Play Console uygulama kaydı ve Play App Signing kurulumu | `dev.sifrekasa` paket adı Play Console'da alındı; Play App Signing ve formlar tamamlanacak |
 | GP-13 | P0 | `TODO` | İç Test (Internal Testing) kanalına ilk AAB yüklemesi ve doğrulama | Play Store üzerinden indirilip gerçek cihazda kuruldu, çalıştı |
 | GP-14 | P0 | `TODO` | Kapalı Test (Closed Testing — 12 test kullanıcısı, 14 kesintisiz gün) | Kişisel geliştirici hesabı gereksinimi karşılandı, test geri bildirimleri kapatıldı |
 | GP-15 | P0 | `TODO` | Üretim (Production) incelemesine gönderim ve yayın | Uygulama onaylandı ve Google Play Store'da yayında |
