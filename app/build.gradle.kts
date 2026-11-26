@@ -44,12 +44,16 @@ android {
             signingConfig = signingConfigs.findByName("release")
             // libsodium'un sağladığı dört mimari. 32 bit ARM gerekli: bazı Android 14+ telefonlar (ör. Android Go)
             // 32 bit çalışır. JNA'nın artık kullanılmayan mimarileri (armeabi, mips) dışarıda kalır.
-            ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86") }
+            ndk {
+                abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
         }
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     compileOptions {
@@ -82,4 +86,6 @@ dependencies {
 
     implementation("com.goterl:lazysodium-android:5.2.0@aar")
     implementation("net.java.dev.jna:jna:5.19.1@aar")
+
+    testImplementation("junit:junit:4.13.2")
 }

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ŞifreKasa — Gizlilik Politikası / Privacy Policy</title>
+  <style>
+    :root {
+      --bg: #f7f9fc;
+      --card: #ffffff;
+      --text: #162231;
+      --muted: #4b5c70;
+      --brand: #1f3a5f;
+      --border: #dde5ef;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1722;
+        --card: #162231;
+        --text: #eef3f8;
+        --muted: #a6b7ca;
+        --brand: #4d82c3;
+        --border: #25364a;
+      }
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .wrap { max-width: 780px; margin: 0 auto; padding: 32px 20px 64px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    h1 { margin-top: 0; color: var(--brand); }
+    h2 { color: var(--brand); font-size: 1.15rem; margin-top: 24px; }
+    .meta { color: var(--muted); font-size: 0.92rem; margin-bottom: 16px; }
+    a { color: var(--brand); }
+    nav { margin-bottom: 16px; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav><a href="index.html">← ŞifreKasa Ana Sayfa</a> · <a href="#en">English Version ↓</a></nav>
+
+    <article class="card" id="tr">
+      <h1>Gizlilik Politikası (ŞifreKasa)</h1>
+      <p class="meta">Son güncelleme: 26 Kasım 2026 · Uygulama kimliği: <code>dev.sifrekasa</code></p>
+
+      <p><strong>ŞifreKasa</strong>, açık kaynaklı ve çevrimdışı öncelikli bir şifre, 2FA (TOTP) ve geçiş anahtarı (Passkey) yöneticisidir. Gizliliğiniz mimarinin temel ilkesidir: <strong>geliştiriciye ait hiçbir sunucuya kişisel veri toplanmaz, iletilmez veya üçüncü taraflarla paylaşılmaz.</strong></p>
+
+      <h2>1. Toplanan Veriler</h2>
+      <p>ŞifreKasa <strong>hiçbir kişisel veri, kullanım analitiği, reklam kimliği veya çökme raporu toplamaz</strong>. Uygulama içinde üçüncü taraf analitik, reklam veya takipçi SDK'sı bulunmaz.</p>
+
+      <h2>2. Verilerin Cihazda Saklanması</h2>
+      <ul>
+        <li>Tüm giriş kayıtlarınız, 2FA anahtarlarınız ve geçiş anahtarlarınız yalnızca kendi cihazınızın özel depolama alanında <strong>Argon2id + XChaCha20-Poly1305</strong> ile şifrelenerek saklanır.</li>
+        <li>Android bulut yedeklemesi ve cihazdan cihaza sistem aktarımı kasıtlı olarak devre dışıdır (<code>allowBackup=false</code>).</li>
+        <li>Yedekleme özelliğini etkinleştirirseniz, verileriniz ayrı bir yedek parolasıyla şifrelenmiş <code>.skx</code> dosyası olarak yalnızca sizin seçtiğiniz konuma (ör. cihaz depolaması veya Google Drive) yazılır.</li>
+      </ul>
+
+      <h2>3. Uygulama İzinleri</h2>
+      <ul>
+        <li><strong>Kamera (<code>CAMERA</code>):</strong> Yalnızca 2FA (TOTP) kurulumu ve "Bilgisayara gönder" QR kodlarını taramak için kullanılır. Kamera görüntüleri yalnızca cihaz belleğinde anlık olarak işlenir; kaydedilmez ve hiçbir yere gönderilmez.</li>
+        <li><strong>İnternet (<code>INTERNET</code>):</strong> Yalnızca kullanıcı tarafından açıkça başlatılan ve onaylanan "Bilgisayara şifre gönder" özelliğinde, uçtan uca şifreli (X25519 + AES-256-GCM) tek kullanımlık iletiyi kullanıcının kendi tanımladığı aktarıcı (relay) adresine göndermek için kullanılır. Bunun dışında uygulama hiçbir ağ bağlantısı kurmaz.</li>
+        <li><strong>Otomatik Doldurma ve Geçiş Anahtarları:</strong> Yalnızca kullanıcı tarafından sistem ayarlarında etkinleştirildiğinde ve her kullanımda kullanıcı onayıyla çalışır.</li>
+      </ul>
+
+      <h2>4. Üçüncü Taraflarla Paylaşım</h2>
+      <p>Geliştirici hiçbir kullanıcı verisine erişemez ve hiçbir üçüncü tarafla veri paylaşmaz. Yedek dosyalarını kendi seçtiğiniz bir bulut depolama sağlayıcısına kaydederseniz, ilgili dosya şifreli olarak o sağlayıcının gizlilik politikasına tabi olur.</p>
+
+      <h2>5. Açık Kaynak ve İletişim</h2>
+      <p>ŞifreKasa'nın tüm kaynak kodu herkese açıktır ve incelenebilir: <a href="https://github.com/b11s3c/SifreKasa">github.com/b11s3c/SifreKasa</a>. Gizlilikle ilgili sorularınız için GitHub deposu üzerinden kayıt (Issue) açabilirsiniz.</p>
+    </article>
+
+    <article class="card" id="en" lang="en">
+      <h1>Privacy Policy (ŞifreKasa)</h1>
+      <p class="meta">Last updated: November 26, 2026 · Application ID: <code>dev.sifrekasa</code></p>
+
+      <p><strong>ŞifreKasa</strong> is an open-source, offline-first password, 2FA (TOTP), and passkey manager for Android. Privacy is a core architectural guarantee: <strong>we do not collect, transmit, or share any personal data.</strong></p>
+
+      <h2>1. Data Collection</h2>
+      <p>ŞifreKasa collects <strong>no personal data, analytics, advertising IDs, telemetry, or crash reports</strong>. The app contains no third-party analytics, advertising, or tracking SDKs.</p>
+
+      <h2>2. On-Device Storage &amp; Backups</h2>
+      <ul>
+        <li>All credentials, TOTP secrets, and passkeys are stored exclusively on your device, encrypted with <strong>Argon2id + XChaCha20-Poly1305</strong>.</li>
+        <li>Android cloud backup and device-to-device transfer are disabled (<code>allowBackup=false</code>).</li>
+        <li>Optional backups are encrypted with a separate backup password (<code>.skx</code> format) and written only to a location chosen by you via Android's Storage Access Framework.</li>
+      </ul>
+
+      <h2>3. Permissions</h2>
+      <ul>
+        <li><strong>Camera (<code>CAMERA</code>):</strong> Used strictly to scan TOTP and Send-to-PC QR codes locally in memory. Frames are never saved or transmitted.</li>
+        <li><strong>Internet (<code>INTERNET</code>):</strong> Used solely when you explicitly approve sending a single end-to-end encrypted (X25519 + AES-256-GCM) credential message to your own user-configured relay URL. No other network requests are made.</li>
+      </ul>
+
+      <h2>4. Open Source &amp; Contact</h2>
+      <p>ŞifreKasa is open source at <a href="https://github.com/b11s3c/SifreKasa">github.com/b11s3c/SifreKasa</a>. For privacy questions or security reports, please open an issue on the GitHub repository.</p>
+    </article>
+  </div>
+</body>
+</html>

@@ -40,6 +40,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.credentials.CredentialManager
 import androidx.fragment.app.FragmentActivity
 import dev.sifrekasa.AppContainer
+import dev.sifrekasa.BuildConfig
 import dev.sifrekasa.core.crypto.Secrets
 import dev.sifrekasa.security.BiometricAuth
 import java.security.GeneralSecurityException
@@ -204,6 +205,32 @@ fun SettingsScreen(container: AppContainer, activity: FragmentActivity, onBack: 
                     settings.clipboardClearSeconds = it
                 },
             )
+            HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
+            SectionTitle("Hakkında")
+            Text(
+                "ŞifreKasa ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) — Açık kaynak, çevrimdışı öncelikli şifre ve geçiş anahtarı yöneticisi.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            OutlinedButton(
+                onClick = {
+                    runCatching {
+                        activity.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse("https://b11s3c.github.io/SifreKasa/privacy-policy.html"))
+                        )
+                    }
+                },
+                modifier = Modifier.padding(top = 8.dp),
+            ) { Text("Gizlilik politikası") }
+            OutlinedButton(
+                onClick = {
+                    runCatching {
+                        activity.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/b11s3c/SifreKasa"))
+                        )
+                    }
+                },
+                modifier = Modifier.padding(top = 4.dp),
+            ) { Text("Kaynak kodu (GitHub)") }
         }
     }
 }

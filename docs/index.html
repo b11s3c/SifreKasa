@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ŞifreKasa — Açık Kaynak Şifre, 2FA ve Geçiş Anahtarı Yöneticisi</title>
+  <style>
+    :root {
+      --bg: #f7f9fc;
+      --card: #ffffff;
+      --text: #162231;
+      --muted: #4b5c70;
+      --brand: #1f3a5f;
+      --border: #dde5ef;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1722;
+        --card: #162231;
+        --text: #eef3f8;
+        --muted: #a6b7ca;
+        --brand: #4d82c3;
+        --border: #25364a;
+      }
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+    .wrap {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 40px 20px 64px;
+    }
+    header {
+      background: #1f3a5f;
+      color: #ffffff;
+      border-radius: 16px;
+      padding: 32px 28px;
+      margin-bottom: 24px;
+    }
+    header h1 { margin: 0 0 8px; font-size: 2rem; }
+    header p { margin: 0; opacity: 0.92; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    h2 { margin-top: 0; color: var(--brand); font-size: 1.25rem; }
+    ul { padding-left: 20px; }
+    a { color: var(--brand); text-decoration: none; font-weight: 600; }
+    a:hover { text-decoration: underline; }
+    .links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+    .btn {
+      display: inline-block;
+      padding: 10px 16px;
+      border-radius: 10px;
+      background: #ffffff;
+      color: #1f3a5f;
+      font-weight: 600;
+    }
+    .btn-outline {
+      background: transparent;
+      color: #ffffff;
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+    footer { color: var(--muted); font-size: 0.9rem; text-align: center; margin-top: 32px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>ŞifreKasa</h1>
+      <p>Android 14+ için açık kaynak, çevrimdışı öncelikli, sıfır telemetrili şifre, 2FA (TOTP) ve geçiş anahtarı (Passkey) yöneticisi.</p>
+      <div class="links">
+        <a class="btn" href="privacy-policy.html">Gizlilik Politikası / Privacy Policy</a>
+        <a class="btn btn-outline" href="https://github.com/b11s3c/SifreKasa">GitHub Kaynak Kodu</a>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Temel Özellikler</h2>
+      <ul>
+        <li><strong>Güçlü Yerel Şifreleme:</strong> Argon2id (128 MiB) anahtar türetme ve XChaCha20-Poly1305 (libsodium) ile cihaz içi şifreli kasa.</li>
+        <li><strong>2FA (TOTP) ve Geçiş Anahtarları (Passkey):</strong> RFC 6238 uyumlu tek kullanımlık kodlar, QR tarama ve Android Credential Manager (PRF destekli) geçiş anahtarı sağlayıcısı.</li>
+        <li><strong>Otomatik Doldurma:</strong> Uygulama ve tarayıcılarda oltalama korumalı güvenli otomatik doldurma.</li>
+        <li><strong>Şifreli Yedekleme:</strong> Ayrı parolayla şifrelenmiş <code>.skx</code> dışa/içe aktarım ve SAF ile otomatik yedek.</li>
+        <li><strong>Bilgisayara Güvenli Gönderim:</strong> İsteğe bağlı tarayıcı eklentisi ve kendi aktarıcınız üzerinden X25519 + AES-256-GCM uçtan uca şifreli tek seferlik gönderim.</li>
+        <li><strong>Sıfır Telemetri:</strong> Analitik, reklam, takipçi veya çökme raporu SDK'sı içermez.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Teknik Belgeler</h2>
+      <ul>
+        <li><a href="https://github.com/b11s3c/SifreKasa/blob/main/docs/tehdit-modeli.md">Tehdit Modeli</a></li>
+        <li><a href="https://github.com/b11s3c/SifreKasa/blob/main/docs/dosya-bicimi.md">Kasa ve Yedek Dosya Biçimi (SKV1 / SKX1)</a></li>
+        <li><a href="https://github.com/b11s3c/SifreKasa/blob/main/docs/gonderme-protokolu.md">Bilgisayara Şifre Gönderme Protokolü</a></li>
+      </ul>
+    </section>
+
+    <footer>
+      ŞifreKasa · Açık Kaynak Proje · <a href="privacy-policy.html">Gizlilik Politikası</a>
+    </footer>
+  </div>
+</body>
+</html>
