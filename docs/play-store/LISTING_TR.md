@@ -25,7 +25,7 @@ AÇIK KAYNAK VE ŞEFFAF
 ŞifreKasa'nın tüm kaynak kodu, dosya biçimi ve tehdit modeli GitHub üzerinde herkesin incelemesine açıktır:
 https://github.com/b11s3c/SifreKasa
 
-Gereksinim: Android 14 ve üzeri.
+Not: Geçiş anahtarı (Passkey) sağlayıcısı, geçiş anahtarlarını destekleyen cihazlarda etkinleştirilebilir.
 
 ## Sürüm Notları (v0.1.1 — İlk Yayın)
 - Şifreli yerel kasa (Argon2id + XChaCha20-Poly1305) ve biyometrik kilit

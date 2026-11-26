@@ -2,6 +2,7 @@ package dev.sifrekasa
 
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.os.Build
 import android.os.Bundle
 import androidx.compose.runtime.mutableStateOf
 import android.view.WindowManager
@@ -30,7 +31,9 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Ekran görüntüsü, ekran kaydı ve "son uygulamalar" önizlemesini engelle.
         window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
-        setRecentsScreenshotEnabled(false)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            setRecentsScreenshotEnabled(false)
+        }
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         readDebugLink(intent)

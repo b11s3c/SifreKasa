@@ -8,6 +8,7 @@ import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.PersistableBundle
@@ -27,7 +28,12 @@ class ClipboardHelper(private val context: Context, private val settings: AppSet
 
     fun copySensitive(text: String) {
         val clip = ClipData.newPlainText("", text).apply {
-            description.extras = PersistableBundle().apply { putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true) }
+            val sensitiveKey = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ClipDescription.EXTRA_IS_SENSITIVE
+            } else {
+                "android.content.extra.IS_SENSITIVE"
+            }
+            description.extras = PersistableBundle().apply { putBoolean(sensitiveKey, true) }
         }
         clipboard.setPrimaryClip(clip)
 

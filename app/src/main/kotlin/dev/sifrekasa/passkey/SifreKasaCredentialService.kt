@@ -1,7 +1,9 @@
 package dev.sifrekasa.passkey
 
+import android.os.Build
 import android.os.CancellationSignal
 import android.os.OutcomeReceiver
+import androidx.annotation.RequiresApi
 import androidx.credentials.exceptions.ClearCredentialException
 import androidx.credentials.exceptions.CreateCredentialException
 import androidx.credentials.exceptions.CreateCredentialUnknownException
@@ -29,6 +31,7 @@ import dev.sifrekasa.data.VaultState
  * Servis hiçbir zaman imza üretmez ve özel anahtara dokunmaz; yalnızca seçenekleri listeler.
  * Asıl işlem kullanıcı doğrulamasından sonra [PasskeyActivity] içinde yapılır.
  */
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 class SifreKasaCredentialService : CredentialProviderService() {
     private val vault get() = (application as SifreKasaApp).container.vault
 

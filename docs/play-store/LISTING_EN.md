@@ -25,7 +25,7 @@ OPEN SOURCE
 Audit the full source code, file format, and threat model on GitHub:
 https://github.com/b11s3c/SifreKasa
 
-Requires Android 14+.
+Note: The Passkey provider is available on devices that support passkeys.
 
 ## Release Notes (v0.1.1 — Initial Release)
 - Local encrypted vault (Argon2id + XChaCha20-Poly1305) with biometric unlock

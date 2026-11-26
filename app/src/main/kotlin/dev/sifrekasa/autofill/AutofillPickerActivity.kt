@@ -3,6 +3,7 @@ package dev.sifrekasa.autofill
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.service.autofill.Dataset
 import android.service.autofill.Field
@@ -61,8 +62,18 @@ class AutofillPickerActivity : FragmentActivity() {
 
         val callerPackage = intent.getStringExtra(EXTRA_PACKAGE).orEmpty()
         val domain = intent.getStringExtra(EXTRA_DOMAIN)
-        val usernameId = intent.getParcelableExtra(EXTRA_USERNAME_ID, AutofillId::class.java)
-        val passwordIds = intent.getParcelableArrayListExtra(EXTRA_PASSWORD_IDS, AutofillId::class.java).orEmpty()
+        val usernameId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(EXTRA_USERNAME_ID, AutofillId::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra(EXTRA_USERNAME_ID)
+        }
+        val passwordIds = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableArrayListExtra(EXTRA_PASSWORD_IDS, AutofillId::class.java).orEmpty()
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableArrayListExtra<AutofillId>(EXTRA_PASSWORD_IDS).orEmpty()
+        }
         val callerLabel = try {
             packageManager.getApplicationLabel(packageManager.getApplicationInfo(callerPackage, 0)).toString()
         } catch (e: PackageManager.NameNotFoundException) {
@@ -97,15 +108,32 @@ class AutofillPickerActivity : FragmentActivity() {
         val presentation = RemoteViews(packageName, R.layout.autofill_item).apply {
             setTextViewText(R.id.autofill_text, entry.title.ifBlank { entry.username })
         }
-        val dataset = Dataset.Builder(Presentations.Builder().setMenuPresentation(presentation).build())
+        val dataset = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Dataset.Builder(Presentations.Builder().setMenuPresentation(presentation).build())
+        } else {
+            @Suppress("DEPRECATION")
+            Dataset.Builder(presentation)
+        }
         var any = false
         if (usernameId != null && entry.username.isNotEmpty()) {
-            dataset.setField(usernameId, Field.Builder().setValue(AutofillValue.forText(entry.username)).build())
+            val value = AutofillValue.forText(entry.username)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                dataset.setField(usernameId, Field.Builder().setValue(value).build())
+            } else {
+                @Suppress("DEPRECATION")
+                dataset.setValue(usernameId, value)
+            }
             any = true
         }
         if (entry.password.isNotEmpty()) {
+            val value = AutofillValue.forText(entry.password)
             passwordIds.forEach { id ->
-                dataset.setField(id, Field.Builder().setValue(AutofillValue.forText(entry.password)).build())
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    dataset.setField(id, Field.Builder().setValue(value).build())
+                } else {
+                    @Suppress("DEPRECATION")
+                    dataset.setValue(id, value)
+                }
                 any = true
             }
         }

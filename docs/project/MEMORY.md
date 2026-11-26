@@ -7,8 +7,8 @@
 - **Uygulama Adı:** ŞifreKasa
 - **Application ID:** `dev.sifrekasa`
 - **Hedef:** Google Play Store üzerinde uçtan uca yayınlanacak, çevrimdışı-öncelikli, sıfır telemetrili, yerel Android parola, 2FA (TOTP) ve geçiş anahtarı (Passkey/WebAuthn) yöneticisi.
-- **Mevcut Sürüm:** `versionCode = 2`, `versionName = "0.1.1"` (`app/build.gradle.kts`)
-- **Platform Desteği:** Android 14+ (`minSdk = 34`, `compileSdk = 36`, `targetSdk = 36`)
+- **Mevcut Sürüm:** `versionCode = 3`, `versionName = "0.1.2"` (`app/build.gradle.kts`)
+- **Platform Desteği:** Android 11+ (`minSdk = 30`, `compileSdk = 36`, `targetSdk = 36`); Passkey sağlayıcısı Android 14+ (API 34+) cihazlarda aktif.
 - **Dil:** Türkçe arayüz ve dokümantasyon (İngilizce mağaza/uygulama desteği backlog'da değerlendirilecek).
 
 ## 2. Teknoloji Yığını ve Sürümler

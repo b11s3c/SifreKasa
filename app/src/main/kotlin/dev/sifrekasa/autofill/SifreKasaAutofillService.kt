@@ -2,6 +2,7 @@ package dev.sifrekasa.autofill
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.os.Build
 import android.os.CancellationSignal
 import android.service.autofill.AutofillService
 import android.service.autofill.Dataset
@@ -51,8 +52,16 @@ class SifreKasaAutofillService : AutofillService() {
         // Kimlik doğrulama veri kümesi düzeyindedir: seçim ekranının döndürdüğü veri kümesi doğrudan
         // forma uygulanır. (Yanıt düzeyinde doğrulamada sistem tek bir veri kümesini kabul etmez.)
         // Buradaki alanlar değer taşımaz; yalnızca hangi alanlar için öneri gösterileceğini belirtir.
-        val placeholder = Dataset.Builder(Presentations.Builder().setMenuPresentation(presentation).build())
-        form.allIds.forEach { placeholder.setField(it, Field.Builder().build()) }
+        val placeholder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Dataset.Builder(Presentations.Builder().setMenuPresentation(presentation).build()).apply {
+                form.allIds.forEach { setField(it, Field.Builder().build()) }
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            Dataset.Builder(presentation).apply {
+                form.allIds.forEach { setValue(it, null) }
+            }
+        }
         placeholder.setAuthentication(pending.intentSender)
         val response = FillResponse.Builder().addDataset(placeholder.build()).build()
         callback.onSuccess(response)

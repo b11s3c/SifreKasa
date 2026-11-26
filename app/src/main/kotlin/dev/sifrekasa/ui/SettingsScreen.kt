@@ -34,6 +34,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.view.autofill.AutofillManager
 import androidx.compose.material3.OutlinedButton
@@ -169,14 +170,22 @@ fun SettingsScreen(container: AppContainer, activity: FragmentActivity, onBack: 
                 },
                 enabled = !autofillEnabled,
             ) { Text("Otomatik doldurma hizmetini seç") }
-            Text(
-                "Geçiş anahtarları için ŞifreKasa'yı sistem ayarlarında sağlayıcı olarak etkinleştir.",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 8.dp),
-            )
-            OutlinedButton(
-                onClick = { runCatching { CredentialManager.create(activity).createSettingsPendingIntent().send() } },
-            ) { Text("Geçiş anahtarı sağlayıcı ayarları") }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                Text(
+                    "Geçiş anahtarları için ŞifreKasa'yı sistem ayarlarında sağlayıcı olarak etkinleştir.",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+                OutlinedButton(
+                    onClick = { runCatching { CredentialManager.create(activity).createSettingsPendingIntent().send() } },
+                ) { Text("Geçiş anahtarı sağlayıcı ayarları") }
+            } else {
+                Text(
+                    "Geçiş anahtarı (Passkey) sağlayıcısı, Android 14 ve üzeri geçiş anahtarı destekleyen cihazlarda etkinleştirilebilir.",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
             HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
             SectionTitle("Bilgisayara gönder")
             var relay by remember { mutableStateOf(settings.relayUrl) }
